@@ -1,0 +1,62 @@
+.container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.emptyState {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    background: var(--bg-dark);
+    border: 1px dashed var(--bg-medium);
+    border-radius: 0.75rem;
+    color: var(--text-muted);
+}
+
+.rollingOverlay {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 1.5rem;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    border-radius: 9999px;
+    color: var(--gold-400);
+    font-weight: 600;
+    animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        opacity: 0.7;
+        transform: translateX(-50%) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+.resultDisplay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    border-radius: 0.5rem;
+}
+
+.total {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gold-400);
+}

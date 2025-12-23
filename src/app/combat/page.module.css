@@ -1,0 +1,426 @@
+.combatPage {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.pageHeader {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.headerContent h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.headerContent p {
+    color: var(--text-secondary);
+}
+
+.headerActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.combatControls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.roundInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.roundLabel {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.roundNumber {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gold-400);
+}
+
+.turnControls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.controlBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--bg-medium);
+    border: none;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.controlBtn:hover:not(:disabled) {
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.controlBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.playBtn {
+    width: 56px;
+    height: 56px;
+    background: var(--success);
+    color: white;
+}
+
+.playBtn:hover:not(:disabled) {
+    background: var(--success-dark);
+    color: white;
+}
+
+.pauseBtn {
+    width: 56px;
+    height: 56px;
+    background: var(--warning);
+    color: var(--bg-darkest);
+}
+
+.pauseBtn:hover {
+    background: var(--warning-dark);
+    color: var(--bg-darkest);
+}
+
+.actionButtons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.initiativeList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+    color: var(--text-muted);
+}
+
+.emptyState svg {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.emptyState p {
+    margin-bottom: 0.5rem;
+}
+
+.hint {
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem !important;
+}
+
+.combatantCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-dark);
+    border: 2px solid var(--bg-medium);
+    border-radius: 0.75rem;
+    position: relative;
+    transition: all 0.15s ease;
+}
+
+.combatantCard.current {
+    border-color: var(--gold-500);
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.1), transparent);
+}
+
+.combatantCard.dead {
+    opacity: 0.5;
+}
+
+.turnIndicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--gold-500);
+    border-radius: 4px 0 0 4px;
+}
+
+.initiativeBadge {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-medium);
+    border-radius: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-400);
+    flex-shrink: 0;
+}
+
+.combatantAvatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-medium);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.combatantCard.current .combatantAvatar {
+    background: var(--gold-500);
+    color: var(--bg-darkest);
+}
+
+.combatantInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.combatantInfo h3 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.combatantMeta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.combatantMeta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.conditionCount {
+    color: var(--warning);
+}
+
+.hpSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 120px;
+}
+
+.hpControls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.hpControls button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-medium);
+    border: none;
+    border-radius: 0.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.hpControls button:hover {
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.hpValue {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.hpValue svg {
+    color: var(--danger);
+}
+
+.hpBar {
+    height: 4px;
+    background: var(--bg-darker);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.hpFill {
+    height: 100%;
+    transition: width 0.2s ease;
+}
+
+.combatantActions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.actionBtn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.25rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+}
+
+.modal h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.formRow {
+    display: flex;
+    gap: 1rem;
+}
+
+.formRow .formGroup {
+    flex: 1;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+}
+
+.checkbox input {
+    width: auto;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .combatPage {
+        padding: 1rem;
+        padding-top: 4rem;
+    }
+
+    .pageHeader {
+        flex-direction: column;
+    }
+
+    .headerActions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .combatControls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .combatantCard {
+        flex-wrap: wrap;
+    }
+
+    .hpSection {
+        width: 100%;
+        order: 10;
+        margin-top: 0.5rem;
+    }
+}

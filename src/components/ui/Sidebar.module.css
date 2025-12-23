@@ -1,0 +1,228 @@
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: var(--bg-darker);
+    border-right: 1px solid var(--bg-medium);
+    transition: width 0.25s ease;
+    overflow: hidden;
+    z-index: 100;
+}
+
+.desktopSidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+}
+
+.mobileSidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 280px !important;
+}
+
+.collapsed {
+    width: 72px;
+}
+
+.sidebarOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 99;
+}
+
+.mobileMenuBtn {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 50;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.sidebarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--bg-medium);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.logoIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
+.crownIcon {
+    color: var(--gold-400);
+}
+
+.logoText {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.collapseBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--bg-medium);
+    border: none;
+    border-radius: 0.375rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.collapseBtn:hover {
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.rotated {
+    transform: rotate(180deg);
+}
+
+.desktopOnly {
+    display: flex;
+}
+
+.mobileOnly {
+    display: none;
+}
+
+.sidebarNav {
+    flex: 1;
+    padding: 1rem 0.75rem;
+    overflow-y: auto;
+}
+
+.sidebarNav ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.navItem:hover {
+    background: var(--bg-medium);
+    color: var(--text-primary);
+}
+
+.navItem.active {
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), transparent);
+    color: var(--primary-400);
+}
+
+.navIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.navLabel {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.activeIndicator {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--primary-500);
+    border-radius: 0 2px 2px 0;
+}
+
+.sidebarFooter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid var(--bg-medium);
+}
+
+.footerBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    border-radius: 0.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.footerBtn:hover {
+    background: var(--bg-medium);
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .desktopSidebar {
+        display: none;
+    }
+
+    .mobileMenuBtn {
+        display: flex;
+    }
+
+    .desktopOnly {
+        display: none;
+    }
+
+    .mobileOnly {
+        display: flex;
+    }
+}

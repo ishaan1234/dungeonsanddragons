@@ -1,0 +1,443 @@
+.sheet {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Header */
+.sheetHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.characterIdentity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.avatar {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+    border-radius: 0.75rem;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+.nameBlock h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.nameBlock p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.headerActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Core Stats */
+.coreStats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.coreStat {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+}
+
+.coreStat svg {
+    color: var(--primary-400);
+}
+
+.coreValue {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.coreLabel {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.hpStat {
+    flex: 2;
+}
+
+.hpDisplay {
+    flex: 1;
+}
+
+.hpNumbers {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.hpControls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.hpControls button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-medium);
+    border: none;
+    border-radius: 0.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.hpControls button:hover {
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.hpBarLarge {
+    height: 8px;
+    background: var(--bg-darker);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.hpFill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+/* Sections */
+.section {
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+}
+
+.sectionHeader:hover {
+    background: var(--bg-darker);
+}
+
+.sectionHeader h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Abilities Grid */
+.abilitiesGrid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+    padding: 0 1.25rem 1.25rem;
+}
+
+.abilityCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--bg-darker);
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.abilityName {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.375rem;
+}
+
+.abilityMod {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-400);
+}
+
+.abilityScore {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.375rem;
+}
+
+.savingThrow {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-medium);
+    border-radius: 0.25rem;
+}
+
+.savingThrow.proficient {
+    background: rgba(139, 92, 246, 0.2);
+    color: var(--primary-400);
+}
+
+/* Skills List */
+.skillsList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.25rem;
+    padding: 0 1.25rem 1.25rem;
+}
+
+.skillRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+}
+
+.skillRow:hover {
+    background: var(--bg-darker);
+}
+
+.proficiencyDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--text-muted);
+}
+
+.skillRow.proficient .proficiencyDot {
+    background: var(--primary-500);
+    border-color: var(--primary-500);
+}
+
+.skillName {
+    flex: 1;
+}
+
+.skillAbility {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.skillMod {
+    font-weight: 600;
+    color: var(--primary-400);
+    min-width: 24px;
+    text-align: right;
+}
+
+/* Features */
+.featuresList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0 1.25rem 1.25rem;
+}
+
+.featureCard {
+    padding: 1rem;
+    background: var(--bg-darker);
+    border-radius: 0.5rem;
+}
+
+.featureCard h4 {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.featureCard p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.featureSource {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-medium);
+    border-radius: 0.25rem;
+}
+
+/* Equipment */
+.equipmentList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0 1.25rem 1.25rem;
+}
+
+.equipmentItem {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--bg-darker);
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+}
+
+.quantity {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+}
+
+/* Spellcasting */
+.spellcastingInfo {
+    padding: 0 1.25rem 1.25rem;
+}
+
+.spellStats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.spellStat {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+    background: var(--bg-darker);
+    border-radius: 0.5rem;
+}
+
+.spellValue {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gold-400);
+}
+
+.spellLabel {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+}
+
+.spellcastingInfo h4 {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.spellList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.spellTag {
+    padding: 0.375rem 0.75rem;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--gold-400);
+}
+
+/* Background */
+.backgroundInfo {
+    padding: 0 1.25rem 1.25rem;
+}
+
+.backgroundField {
+    margin-bottom: 1rem;
+}
+
+.backgroundField:last-child {
+    margin-bottom: 0;
+}
+
+.backgroundField label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.backgroundField p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.emptyText {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .sheetHeader {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .coreStats {
+        flex-wrap: wrap;
+    }
+
+    .coreStat {
+        flex: 1 1 45%;
+    }
+
+    .hpStat {
+        flex: 1 1 100%;
+        order: -1;
+    }
+
+    .abilitiesGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .skillsList {
+        grid-template-columns: 1fr;
+    }
+}

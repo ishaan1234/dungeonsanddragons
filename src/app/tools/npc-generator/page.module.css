@@ -1,0 +1,241 @@
+.container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.header h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--gold-400);
+}
+
+.header p {
+    color: var(--text-secondary);
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+}
+
+.controlGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.controlGroup label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.controlGroup input {
+    width: 80px;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.npcCard {
+    background: var(--bg-dark);
+    border: 2px solid var(--gold-500);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.npcCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gold-500);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.cardHeader h2 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--text-primary);
+}
+
+.nameInput {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    padding: 0.25rem 0.5rem;
+}
+
+.subHeader {
+    margin-bottom: 2rem;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--bg-medium);
+    padding-bottom: 1rem;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actionBtn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-medium);
+    border: none;
+    border-radius: 0.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.actionBtn:hover {
+    background: var(--bg-light);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.statBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-darker);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+}
+
+.statBlock svg {
+    color: var(--gold-400);
+    margin-bottom: 0.5rem;
+}
+
+.statBlock label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.statBlock span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.statInput {
+    width: 60px;
+    text-align: center;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+}
+
+.abilities {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--bg-darker);
+    border-radius: 0.75rem;
+}
+
+.abilityScore {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.abilityScore label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.scoreValue {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.scoreInput {
+    width: 100%;
+    text-align: center;
+    font-size: 1rem;
+    padding: 0.125rem;
+}
+
+.modValue {
+    font-size: 0.75rem;
+    color: var(--gold-400);
+    margin-top: 0.25rem;
+}
+
+.detailsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.detailItem h4 {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bg-medium);
+    padding-bottom: 0.25rem;
+}
+
+.detailItem p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.editRow {
+    display: flex;
+    gap: 0.5rem;
+}

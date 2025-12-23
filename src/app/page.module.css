@@ -1,0 +1,316 @@
+.dashboard {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.hero {
+    position: relative;
+    padding: 3rem;
+    background: linear-gradient(135deg, var(--bg-dark), var(--bg-darker));
+    border: 1px solid var(--bg-medium);
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.heroContent {
+    position: relative;
+    z-index: 1;
+}
+
+.heroTitle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.heroIcon {
+    color: var(--gold-400);
+}
+
+.heroSubtitle {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.heroActions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.heroDecoration {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    background: radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.statsSection {
+    margin-bottom: 2rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.statCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+}
+
+.statIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+    border-radius: 0.5rem;
+    color: white;
+}
+
+.statInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.statValue {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--bg-medium);
+}
+
+.cardHeader h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.viewAll {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.viewAll:hover {
+    color: var(--primary-400);
+}
+
+.cardBody {
+    padding: 1.25rem;
+}
+
+.quickDiceGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.quickDieBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+    background: var(--bg-darker);
+    border: 2px solid var(--bg-medium);
+    border-radius: 0.5rem;
+    color: var(--die-color);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.quickDieBtn:hover {
+    border-color: var(--die-color);
+    transform: translateY(-2px);
+}
+
+.quickDieBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quickRollResult {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    background: var(--bg-darker);
+    border-radius: 0.5rem;
+}
+
+.resultDisplay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.resultValue {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold-400);
+}
+
+.resultFormula {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.resultPlaceholder {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.emptyState svg {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.emptyState p {
+    margin-bottom: 1rem;
+}
+
+.hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.quickActions h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.actionsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.actionCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.actionCard:hover {
+    border-color: var(--primary-500);
+    transform: translateY(-2px);
+}
+
+.actionIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--bg-medium);
+    border-radius: 0.5rem;
+    color: var(--primary-400);
+}
+
+.actionInfo h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.actionInfo p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+    .contentGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        padding: 1rem;
+        padding-top: 4rem;
+    }
+
+    .hero {
+        padding: 2rem 1.5rem;
+    }
+
+    .heroTitle {
+        font-size: 1.75rem;
+    }
+
+    .quickDiceGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
