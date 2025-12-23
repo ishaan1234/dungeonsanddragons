@@ -239,9 +239,9 @@ export type SpellSchool =
   | 'evocation' | 'illusion' | 'necromancy' | 'transmutation';
 
 export interface SpellComponents {
-  verbal: boolean;
-  somatic: boolean;
-  material: boolean;
+  verbal?: boolean;
+  somatic?: boolean;
+  material?: boolean;
   materialDescription?: string;
 }
 
