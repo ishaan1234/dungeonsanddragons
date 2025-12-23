@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@react-three/drei": "^9.100.0",
-    "@react-three/fiber": "^9.4.2",
+    "@react-three/fiber": "^8.17.10",
     "firebase": "^12.7.0",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
