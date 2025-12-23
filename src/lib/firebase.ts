@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
 // Firebase configuration - Replace with your own config
@@ -9,13 +10,21 @@ const firebaseConfig = {
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "demo-project",
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "demo.appspot.com",
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abc123"
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abc123",
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+// Initialize Analytics (client-side only)
+let analytics;
+if (typeof window !== 'undefined') {
+    isSupported().then(yes => yes && (analytics = getAnalytics(app)));
+}
+export { analytics };
 
 // Session Types
 export interface SessionPlayer {
