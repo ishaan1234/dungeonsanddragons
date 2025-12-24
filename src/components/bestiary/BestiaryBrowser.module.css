@@ -1,0 +1,279 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    padding: 2rem;
+}
+
+.browserContainer {
+    width: 100%;
+    max-width: 1000px;
+    height: 80vh;
+    background: var(--surface-800);
+    border: 1px solid var(--primary-500-20);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--surface-700);
+    background: var(--surface-800);
+}
+
+.header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.closeBtn:hover {
+    background: var(--surface-700);
+    color: var(--text-primary);
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    flex: 1;
+    overflow: hidden;
+}
+
+.listSection {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--surface-700);
+    background: var(--surface-900);
+}
+
+.filters {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-bottom: 1px solid var(--surface-700);
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--surface-800);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--surface-700);
+}
+
+.searchBox input {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    width: 100%;
+    outline: none;
+}
+
+.filterRow {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filterRow select {
+    flex: 1;
+    background: var(--surface-800);
+    border: 1px solid var(--surface-700);
+    color: var(--text-secondary);
+    padding: 0.5rem;
+    border-radius: 6px;
+    outline: none;
+}
+
+.monsterList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.monsterRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid var(--surface-800);
+}
+
+.monsterRow:hover {
+    background: var(--surface-800);
+}
+
+.monsterRow.selected {
+    background: var(--primary-900);
+    border-left: 3px solid var(--primary-500);
+}
+
+.monsterRowInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.meta {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.detailsSection {
+    padding: 2rem;
+    overflow-y: auto;
+    background: var(--surface-800);
+}
+
+.monsterDetails {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.detailsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.detailsHeader h3 {
+    font-size: 2rem;
+    margin: 0;
+    color: var(--primary-400);
+}
+
+.crBadge {
+    background: var(--surface-700);
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.detailsMeta {
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 2rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.statBox {
+    background: var(--surface-900);
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--surface-700);
+}
+
+.abilityScores {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.ability {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: var(--surface-900);
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.abilityLabel {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.abilityScore {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.abilityMod {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.divider {
+    height: 1px;
+    background: var(--surface-700);
+    margin: 2rem 0;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.countInput {
+    background: var(--surface-900);
+    border: 1px solid var(--surface-700);
+    color: var(--text-primary);
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 80px;
+    text-align: center;
+    font-size: 1.125rem;
+}
+
+.emptyState {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    gap: 1rem;
+}

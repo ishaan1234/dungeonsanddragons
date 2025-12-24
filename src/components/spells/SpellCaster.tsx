@@ -63,7 +63,7 @@ export default function SpellCaster({
 
     // Get available spells for this class
     const availableSpells = useMemo(() => {
-        let result = getSpellsByClass(characterClass.toLowerCase());
+        let result = characterClass === 'any' ? spells : getSpellsByClass(characterClass.toLowerCase());
 
         // Filter to known/prepared spells if provided
         if (preparedSpells && preparedSpells.length > 0) {
@@ -86,6 +86,7 @@ export default function SpellCaster({
 
         return result.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
     }, [characterClass, spellsKnown, preparedSpells, filterLevel, searchQuery]);
+
 
     const toggleTarget = (targetId: string) => {
         setSelectedTargets(prev =>

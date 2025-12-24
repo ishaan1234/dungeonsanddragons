@@ -11,6 +11,11 @@ import { createSession, joinSession, GameSession, signInAnon } from '@/lib/fireb
 import { useSession } from '@/contexts/SessionContext';
 import VoiceChat from '@/components/multiplayer/VoiceChat';
 import TextChat from '@/components/multiplayer/TextChat';
+import BestiaryBrowser from '@/components/bestiary/BestiaryBrowser';
+import SpellCaster, { SpellCastResult } from '@/components/spells/SpellCaster';
+import { Monster } from '@/types';
+import { SessionCombatant } from '@/lib/firebase';
+import { Sparkles, Skull } from 'lucide-react';
 import styles from './page.module.css';
 
 export default function PlayPage() {
@@ -21,6 +26,8 @@ export default function PlayPage() {
     const [error, setError] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showSpellCaster, setShowSpellCaster] = useState(false);
+    const [showBestiary, setShowBestiary] = useState(false);
 
     const {
         session,
@@ -37,6 +44,7 @@ export default function PlayPage() {
         startGame,
         leave,
         updateCombatantDeathSaves,
+        addCombatant,
     } = useSession();
 
     // Initialize player ID on mount
@@ -71,6 +79,7 @@ export default function PlayPage() {
             setSessionCode(code);
             await joinSession(code, playerId, playerName);
         } catch (err) {
+            console.error('Create Session Error:', err);
             setError('Failed to create session. Please try again.');
         }
         setLoading(false);
@@ -89,6 +98,7 @@ export default function PlayPage() {
                 setError('Session not found. Check the code and try again.');
             }
         } catch (err) {
+            console.error('Join Session Error:', err);
             setError('Failed to join session. Please try again.');
         }
         setLoading(false);
@@ -105,6 +115,29 @@ export default function PlayPage() {
     const handleLeave = async () => {
         await leave();
         setView('menu');
+    };
+
+    const handleCastSpell = async (result: SpellCastResult) => {
+        await sendMessage(result.description);
+        setShowSpellCaster(false);
+    };
+
+    const handleAddMonster = async (monster: Monster, count: number) => {
+        for (let i = 0; i < count; i++) {
+            const combatant: SessionCombatant = {
+                id: `monster_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 5)}`,
+                name: count > 1 ? `${monster.name} ${i + 1}` : monster.name,
+                type: 'monster',
+                initiative: Math.floor(Math.random() * 20) + 1 + Math.floor((monster.abilityScores.dexterity - 10) / 2),
+                armorClass: monster.armorClass,
+                maxHitPoints: monster.hitPoints,
+                currentHitPoints: monster.hitPoints,
+                conditions: [],
+                deathSaves: { successes: 0, failures: 0 }
+            };
+            await addCombatant(combatant);
+        }
+        setShowBestiary(false);
     };
 
     // Render based on view state
@@ -326,7 +359,9 @@ export default function PlayPage() {
                                 playerName={playerName}
                                 participants={[
                                     { id: session.dmId, name: session.dmName },
-                                    ...session.players.map(p => ({ id: p.odid, name: p.odisplayName }))
+                                    ...session.players
+                                        .filter(p => p.odid !== session.dmId)
+                                        .map(p => ({ id: p.odid, name: p.odisplayName }))
                                 ]}
                             />
                         </div>
@@ -385,7 +420,49 @@ export default function PlayPage() {
                                     </span>
                                 )}
                             </div>
+                            <div className={styles.headerActions}>
+                                <button
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => setShowSpellCaster(true)}
+                                >
+                                    <Sparkles size={16} /> Spells
+                                </button>
+                                {isDM && (
+                                    <button
+                                        className="btn btn-secondary btn-sm"
+                                        onClick={() => setShowBestiary(true)}
+                                    >
+                                        <Skull size={16} /> Bestiary
+                                    </button>
+                                )}
+                            </div>
                         </div>
+
+                        {/* Modals */}
+                        <AnimatePresence>
+                            {showSpellCaster && (
+                                <SpellCaster
+                                    characterName={playerName}
+                                    characterClass="any"
+                                    spellcastingAbility="intelligence"
+                                    spellcastingModifier={0}
+                                    proficiencyBonus={2}
+                                    targets={session.combat.combatants.map(c => ({
+                                        id: c.id,
+                                        name: c.name,
+                                        type: c.type === 'player' ? 'ally' : 'enemy'
+                                    }))}
+                                    onCastSpell={handleCastSpell}
+                                    onClose={() => setShowSpellCaster(false)}
+                                />
+                            )}
+                            {showBestiary && (
+                                <BestiaryBrowser
+                                    onAddMonster={handleAddMonster}
+                                    onClose={() => setShowBestiary(false)}
+                                />
+                            )}
+                        </AnimatePresence>
 
                         {/* Combat Tracker */}
                         <div className={styles.combatArea}>
@@ -488,7 +565,9 @@ export default function PlayPage() {
                                 playerName={playerName}
                                 participants={[
                                     { id: session.dmId, name: session.dmName },
-                                    ...session.players.map(p => ({ id: p.odid, name: p.odisplayName }))
+                                    ...session.players
+                                        .filter(p => p.odid !== session.dmId)
+                                        .map(p => ({ id: p.odid, name: p.odisplayName }))
                                 ]}
                             />
                         </div>

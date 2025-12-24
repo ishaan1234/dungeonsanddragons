@@ -30,8 +30,8 @@ export { analytics };
 export interface SessionPlayer {
     odid: string;
     odisplayName: string;
-    characterId?: string;
-    characterName?: string;
+    characterId?: string | null;
+    characterName?: string | null;
     isReady: boolean;
     joinedAt: number;
 }
@@ -147,8 +147,8 @@ export async function joinSession(
         const newPlayer: SessionPlayer = {
             odid: playerId,
             odisplayName: displayName,
-            characterId,
-            characterName,
+            characterId: characterId ?? null,
+            characterName: characterName ?? null,
             isReady: false,
             joinedAt: Date.now(),
         };
