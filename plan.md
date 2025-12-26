@@ -1,107 +1,296 @@
-# MVP Feature Implementation Plan
+# Character Sheet Management - Play Online Enhancement Plan
 
-## Features to Implement
-1. Condition Tracker
-2. Character Sheet Panel
-3. Fog of War
+## Overview
+Enhance the play online section with comprehensive character sheet management, enabling players to view, edit, and manage their characters during live sessions with real-time synchronization.
 
 ---
 
-## Phase 1: Condition Tracker ✅ COMPLETE
+## Phase 1: Enhanced Character Sheet Panel (Edit Mode)
 
-### 1.1 Data Layer
-- [x] Add condition types to `src/types/index.ts` (already exists, verify)
-- [x] Add `conditions` field to `SessionCombatant` in `src/lib/firebase.ts`
-- [x] Create `updateCombatantConditions` function in firebase.ts
-- [x] Add condition action to `SessionContext.tsx`
+### Current State
+- CharacterSheetPanel exists but is **read-only**
+- Shows basic stats, abilities, skills, spell slots
+- No way to modify character during play
 
-### 1.2 UI Components
-- [x] Create `src/components/combat/ConditionBadge.tsx` - displays condition icon
-- [x] Create `src/components/combat/ConditionPicker.tsx` - modal to add/remove conditions
-- [x] Add condition badges to combatant cards in `src/app/play/page.tsx`
+### 1.1 Editable Character Sheet Component
+- [ ] Create `src/components/character/EditableCharacterSheet.tsx`
+- [ ] Add edit mode toggle (view/edit switch)
+- [ ] Implement inline editing for all fields:
+  - HP adjustment (damage/heal buttons with number input)
+  - Temporary HP management
+  - Spell slot usage tracking (clickable pips)
+  - Condition toggles
+  - Equipment equipped/unequipped toggles
+  - Currency adjustments
+  - Notes field editing
 
-### 1.3 Styling
-- [x] Create `ConditionBadge.module.css` with icons/colors per condition
-- [x] Add condition picker modal styles
+### 1.2 HP Management Widget
+- [ ] Create `src/components/character/HPManager.tsx`
+- [ ] Quick damage/heal buttons (+1, +5, +10, custom)
+- [ ] Temporary HP input with visual distinction
+- [ ] HP history log (recent changes)
+- [ ] Max HP override for level-ups or effects
 
-### 1.4 Testing
-- [x] Navigate to /play, create session
-- [x] Add monster via bestiary
-- [x] Add condition to combatant
-- [ ] Verify condition persists across page refresh
-- [ ] Verify other players see the condition (requires 2nd browser)
+### 1.3 Spell Slot Tracker
+- [ ] Create `src/components/character/SpellSlotTracker.tsx`
+- [ ] Visual slot pips (filled/empty circles) for levels 1-9
+- [ ] Click to expend/restore slots
+- [ ] Warlock pact slot separate tracking
+- [ ] Short/long rest slot recovery buttons
+
+### 1.4 Styling
+- [ ] Create `EditableCharacterSheet.module.css`
+- [ ] Responsive design (modal on mobile, sidebar on desktop)
+- [ ] Dark mode support
+- [ ] Visual feedback for unsaved changes
 
 ---
 
-## Phase 2: Character Sheet Panel ✅ COMPLETE
+## Phase 2: Quick Action Toolbar
 
-### 2.1 Component Structure
-- [x] Create `src/components/character/CharacterSheetPanel.tsx` - slide-out panel
-- [x] Create `src/components/character/CharacterSheetPanel.module.css`
+### 2.1 Combat Quick Actions Panel
+- [ ] Create `src/components/play/QuickActionsBar.tsx`
+- [ ] Persistent toolbar in play view with:
+  - Mini HP bar with +/- buttons
+  - Current AC display
+  - Active conditions badges (clickable to remove)
+  - Spell slot summary (e.g., "3/4 L1 | 2/2 L2")
+  - Death saves tracker (3 success/fail boxes)
 
-### 2.2 Panel Features
-- [x] Display basic info (name, race, class, level)
-- [x] Show ability scores with modifiers
-- [x] Show HP bar (current/max)
-- [x] Show AC, speed, initiative
-- [x] Show proficiencies and skills
-- [x] Show spell slots (if caster)
+### 2.2 Floating Action Button (Mobile)
+- [ ] Create `src/components/play/CharacterFAB.tsx`
+- [ ] Expandable FAB with quick actions
+- [ ] Roll initiative, take damage, cast spell shortcuts
+- [ ] Swipe gestures for common actions
 
 ### 2.3 Integration
-- [x] Add "View Sheet" button to game view in `src/app/play/page.tsx`
-- [x] Pass `myCharacter` state to panel
-- [x] Add toggle state for panel visibility
-
-### 2.4 Testing
-- [ ] Join session with a character selected
-- [ ] Open character sheet panel
-- [ ] Verify all stats display correctly
-- [ ] Test on different screen sizes
+- [ ] Add QuickActionsBar to play page game view
+- [ ] Position below/beside chat panel
+- [ ] Collapsible for more screen space
+- [ ] Sync state with full character sheet
 
 ---
 
-## Phase 3: Fog of War ✅ COMPLETE
+## Phase 3: Character-Combat Synchronization
 
-### 3.1 Data Layer
-- [x] Add `MapState` interface to types (grid, revealed cells)
-- [x] Add `map` field to `GameSession` in firebase.ts
-- [x] Create `updateMapState` function in firebase.ts
-- [x] Add map actions to `SessionContext.tsx`
+### 3.1 Data Sync Layer
+- [ ] Update `SessionCombatant` type to link to Character ID
+- [ ] Create `syncCharacterToCombat()` function
+- [ ] Auto-sync these fields bidirectionally:
+  - HP (currentHitPoints ↔ combatant.hp)
+  - AC (armorClass ↔ combatant.ac)
+  - Conditions (conditions ↔ combatant.conditions)
+  - Initiative (initiative modifier for rolls)
 
-### 3.2 Map Component
-- [x] Create `src/components/map/BattleMap.tsx` - main map canvas
-- [x] Create `src/components/map/BattleMap.module.css`
-- [x] Implement grid rendering (canvas or CSS grid)
-- [x] Add fog overlay (hidden cells are black/semi-transparent)
+### 3.2 Combat Integration
+- [ ] When character takes damage in combat tracker → update character HP
+- [ ] When character HP changes in sheet → update combatant
+- [ ] Death saves sync between character and combat
+- [ ] Concentration tracking for spellcasters
 
-### 3.3 DM Controls
-- [x] Create `src/components/map/MapControls.tsx`
-- [x] Add reveal/hide tools (brush sizes 1x1, 2x2, 3x3)
-- [x] Add "Reveal All" / "Hide All" buttons
-- [x] Add grid size controls
-
-### 3.4 Player View
-- [x] Show only revealed cells to non-DM players
-- [x] Sync fog state via Firebase in real-time
-
-### 3.5 Testing
-- [ ] DM creates session with map
-- [ ] DM reveals portions of map
-- [ ] Player joins and sees only revealed areas
-- [ ] Verify real-time sync when DM changes fog
+### 3.3 Firebase Real-time Sync
+- [ ] Add `characterState` field to session player data
+- [ ] Sync character modifications to Firebase
+- [ ] Other players see updated stats in real-time
+- [ ] DM can view all character states
 
 ---
 
-## Implementation Order
+## Phase 4: Inventory & Equipment Management
 
-1. **Condition Tracker** (simplest, builds on existing combat)
-2. **Character Sheet Panel** (medium, mostly UI)
-3. **Fog of War** (complex, new subsystem)
+### 4.1 Inventory Panel
+- [ ] Create `src/components/character/InventoryPanel.tsx`
+- [ ] Sortable/filterable item list
+- [ ] Item categories (weapons, armor, consumables, misc)
+- [ ] Weight tracking with encumbrance indicator
+- [ ] Quick-use buttons for consumables (potions, scrolls)
+
+### 4.2 Equipment Slots
+- [ ] Visual equipment slots (head, armor, hands, etc.)
+- [ ] Drag-and-drop equipping
+- [ ] Attunement tracking (max 3 items)
+- [ ] Equipment effects on stats (AC bonus, etc.)
+
+### 4.3 Item Management
+- [ ] Add item modal (name, description, quantity, weight)
+- [ ] Edit/delete existing items
+- [ ] Item templates from D&D SRD data
+- [ ] Currency conversion helpers (GP to SP, etc.)
+
+### 4.4 Loot Distribution (Multiplayer)
+- [ ] DM can add items to shared loot pool
+- [ ] Players can claim items from pool
+- [ ] Split currency evenly option
+- [ ] Trade items between characters
+
+---
+
+## Phase 5: DM Character Management Tools
+
+### 5.1 Party Overview Dashboard
+- [ ] Create `src/components/dm/PartyOverview.tsx`
+- [ ] Grid/list view of all player characters
+- [ ] At-a-glance stats (HP bars, AC, conditions)
+- [ ] Click to expand full character sheet
+- [ ] Passive perception/investigation display
+
+### 5.2 DM Character Controls
+- [ ] DM can edit any player character (with toggle)
+- [ ] Apply damage/healing to multiple characters
+- [ ] Add conditions to entire party
+- [ ] Give items/gold to characters
+- [ ] Secret notes visible only to DM
+
+### 5.3 NPC/Monster Quick Stats
+- [ ] Create `src/components/dm/QuickStatBlock.tsx`
+- [ ] Simplified stat block for NPCs
+- [ ] Quick HP tracking
+- [ ] Ability check shortcuts
+- [ ] Reusable NPC templates
+
+---
+
+## Phase 6: Character Progression & Leveling
+
+### 6.1 Level Up Flow
+- [ ] Create `src/components/character/LevelUpWizard.tsx`
+- [ ] Step-by-step level up process:
+  1. HP increase (roll or average)
+  2. New features/abilities from class
+  3. Ability score improvement (at appropriate levels)
+  4. New spells (for casters)
+  5. Proficiency bonus update
+
+### 6.2 Experience Tracking
+- [ ] XP display in character sheet
+- [ ] XP-to-next-level progress bar
+- [ ] DM can award XP to party
+- [ ] Milestone leveling option (no XP tracking)
+
+### 6.3 Multiclassing Support
+- [ ] Add secondary class option
+- [ ] Track levels per class
+- [ ] Combined spell slot calculation
+- [ ] Feature stacking from multiple classes
+
+---
+
+## Phase 7: Session Character State
+
+### 7.1 Session Snapshots
+- [ ] Save character state at session start
+- [ ] Track all changes during session
+- [ ] Session changelog (what changed)
+- [ ] Option to revert to session start state
+
+### 7.2 Post-Session Review
+- [ ] Summary of HP lost/regained
+- [ ] Spell slots used
+- [ ] Items gained/lost
+- [ ] XP earned
+- [ ] Option to apply or discard changes
+
+### 7.3 Long/Short Rest Integration
+- [ ] Short rest button (recover some resources)
+- [ ] Long rest button (full recovery)
+- [ ] Hit dice tracking and spending
+- [ ] Class-specific rest features (Warlock slots, etc.)
+
+---
+
+## Phase 8: Import/Export & Sharing
+
+### 8.1 Character Export
+- [ ] Export to JSON file
+- [ ] Generate shareable character code
+- [ ] PDF character sheet generation (optional)
+- [ ] D&D Beyond format compatibility
+
+### 8.2 Character Import
+- [ ] Import from JSON file
+- [ ] Paste character code to import
+- [ ] Import from D&D Beyond (if API available)
+- [ ] Validate imported data
+
+### 8.3 Character Templates
+- [ ] Save character as template
+- [ ] Pre-built templates (Fighter L1, Wizard L5, etc.)
+- [ ] Quick NPC generation from templates
+
+---
+
+## Suggested Implementation Order
+
+| Priority | Phase | Effort | Impact |
+|----------|-------|--------|--------|
+| 1 | Phase 1 - Edit Mode | Medium | High |
+| 2 | Phase 2 - Quick Actions | Medium | High |
+| 3 | Phase 3 - Combat Sync | Medium | High |
+| 4 | Phase 4 - Inventory | High | Medium |
+| 5 | Phase 5 - DM Tools | Medium | Medium |
+| 6 | Phase 7 - Session State | Low | Medium |
+| 7 | Phase 6 - Leveling | High | Medium |
+| 8 | Phase 8 - Import/Export | Low | Low |
+
+---
+
+## Technical Considerations
+
+### State Management
+- Character edits update Zustand store (persists to localStorage)
+- Session-specific state syncs via Firebase
+- Debounce frequent updates (HP changes) to reduce Firebase writes
+
+### Performance
+- Lazy load inventory for characters with many items
+- Virtualize long skill/spell lists
+- Optimistic UI updates with rollback on sync failure
+
+### Mobile Responsiveness
+- Touch-friendly controls (larger tap targets)
+- Swipe gestures for common actions
+- Bottom sheet modals instead of side panels on mobile
+
+---
+
+## Files to Create/Modify
+
+### New Components
+```
+src/components/character/
+├── EditableCharacterSheet.tsx
+├── EditableCharacterSheet.module.css
+├── HPManager.tsx
+├── SpellSlotTracker.tsx
+├── InventoryPanel.tsx
+├── InventoryPanel.module.css
+├── LevelUpWizard.tsx
+└── LevelUpWizard.module.css
+
+src/components/play/
+├── QuickActionsBar.tsx
+├── QuickActionsBar.module.css
+└── CharacterFAB.tsx
+
+src/components/dm/
+├── PartyOverview.tsx
+├── PartyOverview.module.css
+└── QuickStatBlock.tsx
+```
+
+### Modifications
+```
+src/app/play/page.tsx - Add quick actions, enhanced sheet integration
+src/stores/appStore.ts - Add session character state actions
+src/contexts/SessionContext.tsx - Add character sync functions
+src/lib/firebase.ts - Add character state sync to sessions
+src/types/index.ts - Extend types for session character state
+```
 
 ---
 
 ## Notes
 - Use Chrome DevTools MCP for testing UI changes
 - Use Context7 for React/Firebase documentation
-- Use sub-agents for isolated implementation tasks
 - Commit after each phase completion
+- Test multiplayer sync with multiple browser windows

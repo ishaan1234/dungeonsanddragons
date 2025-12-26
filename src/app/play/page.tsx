@@ -21,13 +21,15 @@ import ConditionBadge from '@/components/combat/ConditionBadge';
 import ConditionPicker from '@/components/combat/ConditionPicker';
 import CharacterCreator from '@/components/character/CharacterCreator';
 import CharacterSheetPanel from '@/components/character/CharacterSheetPanel';
+import EditableCharacterSheet from '@/components/character/EditableCharacterSheet';
+import QuickActionsBar from '@/components/play/QuickActionsBar';
 import SpellCreator from '@/components/spells/SpellCreator';
 import BattleMap from '@/components/map/BattleMap';
 import MapControls from '@/components/map/MapControls';
 import Shop from '@/components/shop/Shop';
 import QuickDiceRoller from '@/components/dice/QuickDiceRoller';
 import { useAppStore } from '@/stores/appStore';
-import { Character } from '@/types';
+import { Character, Condition } from '@/types';
 import { Shop as ShopType, ShopItem } from '@/lib/firebase';
 
 // Recent session type for "Continue Session" feature
@@ -55,6 +57,7 @@ export default function PlayPage() {
     const [showCharacterSheet, setShowCharacterSheet] = useState(false);
     const [showMap, setShowMap] = useState(false);
     const [showShop, setShowShop] = useState(false);
+    const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
     const [brushSize, setBrushSize] = useState(1);
     const [selectedCharId, setSelectedCharId] = useState<string>('');
     const { characters } = useAppStore();
@@ -362,6 +365,60 @@ export default function PlayPage() {
     const handleCellClick = async (x: number, y: number) => {
         await toggleCell(x, y);
     };
+
+    // Character update handler for editable character sheet
+    const handleCharacterUpdate = useCallback((updates: Partial<Character>) => {
+        if (!myCharacter) return;
+        const updatedCharacter = { ...myCharacter, ...updates };
+        setMyCharacter(updatedCharacter);
+        // Also update in the store
+        const { updateCharacter } = useAppStore.getState();
+        updateCharacter(updatedCharacter.id, updatedCharacter);
+    }, [myCharacter]);
+
+    // QuickActionsBar handlers
+    const handleQuickHPChange = useCallback((hp: number) => {
+        if (!myCharacter) return;
+        const updated = {
+            ...myCharacter,
+            currentHitPoints: hp
+        };
+        handleCharacterUpdate(updated);
+    }, [myCharacter, handleCharacterUpdate]);
+
+    const handleQuickConditionAdd = useCallback((condition: string) => {
+        if (!myCharacter) return;
+        const currentConditions = myCharacter.conditions || [];
+        const conditionTyped = condition as Condition;
+        if (!currentConditions.includes(conditionTyped)) {
+            const updated = {
+                ...myCharacter,
+                conditions: [...currentConditions, conditionTyped]
+            };
+            handleCharacterUpdate(updated);
+        }
+    }, [myCharacter, handleCharacterUpdate]);
+
+    const handleQuickConditionRemove = useCallback((condition: string) => {
+        if (!myCharacter) return;
+        const updated = {
+            ...myCharacter,
+            conditions: (myCharacter.conditions || []).filter(c => c !== condition)
+        };
+        handleCharacterUpdate(updated);
+    }, [myCharacter, handleCharacterUpdate]);
+
+    const handleQuickDeathSaveChange = useCallback((type: 'success' | 'failure', count: number) => {
+        if (!myCharacter) return;
+        const updated = {
+            ...myCharacter,
+            deathSaves: {
+                ...myCharacter.deathSaves,
+                [type === 'success' ? 'successes' : 'failures']: count
+            }
+        };
+        handleCharacterUpdate(updated);
+    }, [myCharacter, handleCharacterUpdate]);
 
     // Render based on view state
     if (view === 'menu') {
@@ -832,8 +889,9 @@ export default function PlayPage() {
                         {/* Modals */}
                         <AnimatePresence>
                             {showCharacterSheet && myCharacter && (
-                                <CharacterSheetPanel
+                                <EditableCharacterSheet
                                     character={myCharacter}
+                                    onUpdate={handleCharacterUpdate}
                                     onClose={() => setShowCharacterSheet(false)}
                                 />
                             )}
@@ -890,6 +948,19 @@ export default function PlayPage() {
                                 />
                             )}
                         </AnimatePresence>
+
+                        {/* Quick Actions Bar for character management */}
+                        {myCharacter && (
+                            <QuickActionsBar
+                                character={myCharacter}
+                                onHPChange={handleQuickHPChange}
+                                onConditionAdd={handleQuickConditionAdd}
+                                onConditionRemove={handleQuickConditionRemove}
+                                onDeathSaveChange={handleQuickDeathSaveChange}
+                                isExpanded={quickActionsExpanded}
+                                onToggleExpand={() => setQuickActionsExpanded(!quickActionsExpanded)}
+                            />
+                        )}
 
                         {/* Battle Map Section */}
                         {showMap && (

@@ -1,0 +1,67 @@
+.container {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.tempHpInput {
+    width: 4rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 0.25rem;
+    text-align: center;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.tempHpInput:focus {
+    outline: none;
+    border-color: rgba(251, 191, 36, 0.6);
+    background: rgba(251, 191, 36, 0.2);
+}
+
+.tempHpInput::-webkit-inner-spin-button,
+.tempHpInput::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.tempHpInput[type='number'] {
+    -moz-appearance: textfield;
+}
+
+.customInput {
+    flex: 1;
+    min-width: 0;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.25rem;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.customInput:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.customInput::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.customInput::-webkit-inner-spin-button,
+.customInput::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.customInput[type='number'] {
+    -moz-appearance: textfield;
+}
