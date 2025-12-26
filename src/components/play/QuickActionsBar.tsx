@@ -379,29 +379,31 @@ export default function QuickActionsBar({
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -5 }}
                             >
-                                {CONDITIONS.map((condition) => {
-                                    const isActive = character.conditions.includes(condition.value);
-                                    return (
-                                        <button
-                                            key={condition.value}
-                                            className={`${styles.conditionOption} ${isActive ? styles.active : ''}`}
-                                            onClick={() => {
-                                                if (isActive) {
-                                                    onConditionRemove(condition.value);
-                                                } else {
-                                                    onConditionAdd(condition.value);
-                                                }
-                                            }}
-                                        >
-                                            <span
-                                                className={styles.conditionDot}
-                                                style={{ backgroundColor: condition.color }}
-                                            />
-                                            {condition.label}
-                                            {isActive && <Check size={12} className={styles.checkIcon} />}
-                                        </button>
-                                    );
-                                })}
+                                <div className={styles.conditionGrid}>
+                                    {CONDITIONS.map((condition) => {
+                                        const isActive = character.conditions.includes(condition.value);
+                                        return (
+                                            <button
+                                                key={condition.value}
+                                                className={`${styles.conditionOption} ${isActive ? styles.active : ''}`}
+                                                onClick={() => {
+                                                    if (isActive) {
+                                                        onConditionRemove(condition.value);
+                                                    } else {
+                                                        onConditionAdd(condition.value);
+                                                    }
+                                                }}
+                                            >
+                                                <span
+                                                    className={styles.conditionDot}
+                                                    style={{ backgroundColor: condition.color }}
+                                                />
+                                                {condition.label}
+                                                {isActive && <Check size={12} className={styles.checkIcon} />}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
