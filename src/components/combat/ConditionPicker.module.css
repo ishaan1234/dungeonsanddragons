@@ -3,9 +3,11 @@
     background: var(--bg-dark) !important;
     border: 1px solid var(--bg-medium) !important;
     max-width: 480px;
-    max-height: 80vh;
+    max-height: 90vh;
     padding: 0 !important;
-    overflow: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .dialogTitle {
@@ -77,8 +79,10 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
     padding: 1rem 1.25rem;
+    padding-bottom: 1.5rem;
     overflow-y: auto;
-    max-height: 400px;
+    flex: 1;
+    min-height: 0;
 }
 
 .conditionBtn {
