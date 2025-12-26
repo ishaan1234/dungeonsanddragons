@@ -1,9 +1,14 @@
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Skull, Search, Heart, Shield, Zap, Plus, X, ChevronRight } from 'lucide-react';
+import { Skull, Search, Heart, Shield, Zap, Plus, ChevronRight } from 'lucide-react';
 import { monsters, searchMonsters, creatureTypes, formatCR } from '@/data/monsters';
 import { Monster, CreatureType, Size } from '@/types';
-// We'll reuse the logic but style it as a modal/browser
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import styles from './BestiaryBrowser.module.css';
 
 const typeColors: Record<string, string> = {
@@ -68,20 +73,13 @@ export default function BestiaryBrowser({ onAddMonster, onClose }: BestiaryBrows
     };
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <motion.div
-                className={styles.browserContainer}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                onClick={e => e.stopPropagation()}
-            >
-                <div className={styles.header}>
-                    <h2><Skull size={24} /> Bestiary</h2>
-                    <button className={styles.closeBtn} onClick={onClose}>
-                        <X size={24} />
-                    </button>
-                </div>
+        <Sheet open onOpenChange={() => onClose()}>
+            <SheetContent side="right" className={styles.sheetContent}>
+                <SheetHeader className={styles.sheetHeader}>
+                    <SheetTitle className={styles.sheetTitle}>
+                        <Skull size={24} /> Bestiary
+                    </SheetTitle>
+                </SheetHeader>
 
                 <div className={styles.content}>
                     {/* Sidebar / List */}
@@ -184,9 +182,9 @@ export default function BestiaryBrowser({ onAddMonster, onClose }: BestiaryBrows
                                         onChange={e => setCount(Math.max(1, parseInt(e.target.value) || 1))}
                                         className={styles.countInput}
                                     />
-                                    <button className="btn btn-primary" onClick={handleAdd}>
+                                    <Button onClick={handleAdd}>
                                         <Plus size={16} /> Add to Encounter
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         ) : (
@@ -197,7 +195,7 @@ export default function BestiaryBrowser({ onAddMonster, onClose }: BestiaryBrows
                         )}
                     </div>
                 </div>
-            </motion.div>
-        </div>
+            </SheetContent>
+        </Sheet>
     );
 }

@@ -1,0 +1,160 @@
+/* shadcn Dialog overrides */
+.dialogContent {
+    background: var(--bg-dark) !important;
+    border: 1px solid var(--bg-medium) !important;
+    max-width: 480px;
+    max-height: 80vh;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.dialogTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 1rem 1.25rem;
+    padding-right: 3rem;
+    border-bottom: 1px solid var(--bg-medium);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--bg-medium);
+}
+
+.header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.closeBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: 0.375rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.closeBtn:hover {
+    background: var(--bg-medium);
+    color: var(--text-primary);
+}
+
+.activeConditions {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--bg-medium);
+    background: rgba(251, 191, 36, 0.05);
+}
+
+.sectionLabel {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold-400);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.activeBadges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.conditionGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.conditionBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.75rem 0.5rem;
+    background: var(--bg-darker);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.conditionBtn:hover {
+    background: var(--bg-medium);
+    border-color: var(--primary-500);
+    transform: translateY(-1px);
+}
+
+.conditionBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.conditionBtn.active {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: var(--primary-500);
+}
+
+.conditionName {
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.2;
+}
+
+.conditionBtn.active .conditionName {
+    color: var(--primary-400);
+}
+
+.checkIcon {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    color: var(--success);
+}
+
+.description {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-darker);
+    border-top: 1px solid var(--bg-medium);
+    overflow: hidden;
+}
+
+.description svg {
+    flex-shrink: 0;
+    color: var(--gold-400);
+    margin-top: 0.125rem;
+}
+
+.description p {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .conditionGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

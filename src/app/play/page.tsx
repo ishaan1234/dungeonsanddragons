@@ -5,9 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Play, Users, Crown, Copy, Check, LogOut, X,
     Swords, MessageCircle, Settings, Plus,
-    Shield, Heart, ChevronRight, Bell
+    Shield, Heart, ChevronRight, Bell, User, Save, Clock, Trash2
 } from 'lucide-react';
-import { createSession, joinSession, GameSession, signInAnon } from '@/lib/firebase';
+import { createSession, joinSession, GameSession, signInAnon, MapState } from '@/lib/firebase';
 import { useSession } from '@/contexts/SessionContext';
 import VoiceChat from '@/components/multiplayer/VoiceChat';
 import TextChat from '@/components/multiplayer/TextChat';
@@ -15,8 +15,29 @@ import BestiaryBrowser from '@/components/bestiary/BestiaryBrowser';
 import SpellCaster, { SpellCastResult } from '@/components/spells/SpellCaster';
 import { Monster } from '@/types';
 import { SessionCombatant } from '@/lib/firebase';
-import { Sparkles, Skull } from 'lucide-react';
+import { Sparkles, Skull, AlertTriangle, Map, Store } from 'lucide-react';
 import styles from './page.module.css';
+import ConditionBadge from '@/components/combat/ConditionBadge';
+import ConditionPicker from '@/components/combat/ConditionPicker';
+import CharacterCreator from '@/components/character/CharacterCreator';
+import CharacterSheetPanel from '@/components/character/CharacterSheetPanel';
+import SpellCreator from '@/components/spells/SpellCreator';
+import BattleMap from '@/components/map/BattleMap';
+import MapControls from '@/components/map/MapControls';
+import Shop from '@/components/shop/Shop';
+import { useAppStore } from '@/stores/appStore';
+import { Character } from '@/types';
+import { Shop as ShopType, ShopItem } from '@/lib/firebase';
+
+// Recent session type for "Continue Session" feature
+interface RecentSession {
+    code: string;
+    name: string;
+    role: 'dm' | 'player';
+    lastPlayed: number;
+    characterId?: string;
+    characterName?: string;
+}
 
 export default function PlayPage() {
     const [view, setView] = useState<'menu' | 'create' | 'join' | 'lobby' | 'game'>('menu');
@@ -28,6 +49,17 @@ export default function PlayPage() {
     const [loading, setLoading] = useState(false);
     const [showSpellCaster, setShowSpellCaster] = useState(false);
     const [showBestiary, setShowBestiary] = useState(false);
+    const [showSpellCreator, setShowSpellCreator] = useState(false);
+    const [showCharCreator, setShowCharCreator] = useState(false);
+    const [showCharacterSheet, setShowCharacterSheet] = useState(false);
+    const [showMap, setShowMap] = useState(false);
+    const [showShop, setShowShop] = useState(false);
+    const [brushSize, setBrushSize] = useState(1);
+    const [selectedCharId, setSelectedCharId] = useState<string>('');
+    const { characters } = useAppStore();
+    const [myCharacter, setMyCharacter] = useState<Character | null>(null);
+    const [conditionPickerTarget, setConditionPickerTarget] = useState<{ id: string; name: string; conditions: string[] } | null>(null);
+    const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
 
     const {
         session,
@@ -42,9 +74,17 @@ export default function PlayPage() {
         sendMessage,
         sendRoll,
         startGame,
+        pauseGame,
         leave,
         updateCombatantDeathSaves,
         addCombatant,
+        updateCombatantHP,
+        toggleCondition,
+        updateMap,
+        toggleCell,
+        revealAll,
+        hideAll,
+        setShop,
     } = useSession();
 
     // Initialize player ID on mount
@@ -58,6 +98,41 @@ export default function PlayPage() {
         initPlayer();
     }, [playerId, setPlayerId]);
 
+    // Load recent sessions from localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('dnd_recent_sessions');
+            if (saved) {
+                try {
+                    setRecentSessions(JSON.parse(saved));
+                } catch (e) {
+                    console.error('Failed to parse recent sessions:', e);
+                }
+            }
+        }
+    }, []);
+
+    // Save recent sessions to localStorage
+    const saveRecentSession = useCallback((sessionData: RecentSession) => {
+        setRecentSessions(prev => {
+            // Remove existing entry for this session if it exists
+            const filtered = prev.filter(s => s.code !== sessionData.code);
+            // Add new entry at the beginning, keep only last 5
+            const updated = [sessionData, ...filtered].slice(0, 5);
+            localStorage.setItem('dnd_recent_sessions', JSON.stringify(updated));
+            return updated;
+        });
+    }, []);
+
+    // Remove a recent session
+    const removeRecentSession = useCallback((code: string) => {
+        setRecentSessions(prev => {
+            const updated = prev.filter(s => s.code !== code);
+            localStorage.setItem('dnd_recent_sessions', JSON.stringify(updated));
+            return updated;
+        });
+    }, []);
+
     // Handle session state changes
     useEffect(() => {
         if (session) {
@@ -65,9 +140,26 @@ export default function PlayPage() {
                 setView('lobby');
             } else if (session.status === 'playing') {
                 setView('game');
+            } else if (session.status === 'paused') {
+                // Session is paused/saved - can rejoin later
+                setView('game');
             }
         }
     }, [session?.status]);
+
+    // Keep condition picker in sync with session changes
+    useEffect(() => {
+        if (conditionPickerTarget && session) {
+            const combatant = session.combat.combatants.find(c => c.id === conditionPickerTarget.id);
+            if (combatant) {
+                setConditionPickerTarget({
+                    id: combatant.id,
+                    name: combatant.name,
+                    conditions: combatant.conditions || []
+                });
+            }
+        }
+    }, [session?.combat.combatants]);
 
     const handleCreateSession = async () => {
         if (!sessionName.trim() || !playerId) return;
@@ -91,9 +183,23 @@ export default function PlayPage() {
         setError(null);
 
         try {
-            const result = await joinSession(joinCode, playerId, playerName, undefined, characterName);
+            const cId = selectedCharId || undefined;
+            // If selecting a character, use that name. If manual, use input name. If empty, fallback to player name.
+            let cName = characterName;
+            if (!cName && !selectedCharId) {
+                cName = playerName;
+            }
+
+            const result = await joinSession(joinCode, playerId, playerName, cId, cName);
             if (result) {
                 setSessionCode(joinCode.toUpperCase());
+                // Go directly to appropriate view based on session status
+                // This allows players to join sessions already in progress
+                if (result.status === 'playing') {
+                    setView('game');
+                } else if (result.status === 'lobby') {
+                    setView('lobby');
+                }
             } else {
                 setError('Session not found. Check the code and try again.');
             }
@@ -117,7 +223,92 @@ export default function PlayPage() {
         setView('menu');
     };
 
+    // Save & Exit - DM pauses the game, everyone can rejoin later
+    const handleSaveAndExit = async () => {
+        if (!session || !sessionCode) return;
+
+        // Save to recent sessions
+        saveRecentSession({
+            code: sessionCode,
+            name: session.name,
+            role: isDM ? 'dm' : 'player',
+            lastPlayed: Date.now(),
+            characterId: selectedCharId || undefined,
+            characterName: myCharacter?.name || characterName || undefined,
+        });
+
+        // DM pauses the game so others can rejoin later
+        if (isDM) {
+            await pauseGame();
+        }
+
+        // Clear current session
+        setSessionCode(null);
+        setView('menu');
+    };
+
+    // Rejoin a saved session
+    const handleRejoinSession = async (recentSession: RecentSession) => {
+        if (!playerId) return;
+        setLoading(true);
+        setError(null);
+
+        try {
+            // Set character if we had one
+            if (recentSession.characterId) {
+                const char = characters.find(c => c.id === recentSession.characterId);
+                if (char) {
+                    setSelectedCharId(char.id);
+                    setMyCharacter(char);
+                    setCharacterName(char.name);
+                }
+            }
+
+            const result = await joinSession(
+                recentSession.code,
+                playerId,
+                playerName,
+                recentSession.characterId,
+                recentSession.characterName
+            );
+
+            if (result) {
+                setSessionCode(recentSession.code);
+                // Update last played time
+                saveRecentSession({
+                    ...recentSession,
+                    lastPlayed: Date.now(),
+                });
+
+                if (result.status === 'playing' || result.status === 'paused') {
+                    setView('game');
+                } else if (result.status === 'lobby') {
+                    setView('lobby');
+                }
+            } else {
+                setError('Session not found or has ended.');
+                removeRecentSession(recentSession.code);
+            }
+        } catch (err) {
+            console.error('Rejoin Session Error:', err);
+            setError('Failed to rejoin session.');
+        }
+        setLoading(false);
+    };
+
     const handleCastSpell = async (result: SpellCastResult) => {
+        const { damage, healing, targetIds } = result;
+
+        // Apply effects to targets
+        if (targetIds.length > 0 && (damage || healing)) {
+            const updates = targetIds.map(id => {
+                if (damage) return updateCombatantHP(id, -damage.total);
+                if (healing) return updateCombatantHP(id, healing.total);
+                return Promise.resolve();
+            });
+            await Promise.all(updates);
+        }
+
         await sendMessage(result.description);
         setShowSpellCaster(false);
     };
@@ -138,6 +329,37 @@ export default function PlayPage() {
             await addCombatant(combatant);
         }
         setShowBestiary(false);
+        setShowBestiary(false);
+    };
+
+    const handleAttack = async (targetId: string, targetName: string) => {
+        // Simple attack roll for now
+        // In the future, we can open an attack modal with weapon selection
+        const attackRoll = Math.floor(Math.random() * 20) + 1;
+        const modifier = myCharacter ? Math.floor((Math.max(myCharacter.abilityScores.strength, myCharacter.abilityScores.dexterity) - 10) / 2) : 0;
+        const total = attackRoll + modifier;
+
+        await sendMessage(`/me attacks ${targetName}: rolled ${attackRoll} + ${modifier} = ${total}`);
+    };
+
+    const handleCreateMap = async (width: number, height: number, cellSize: number) => {
+        // Initialize fog grid with all cells hidden
+        const fogGrid: boolean[][] = Array(height).fill(null).map(() =>
+            Array(width).fill(false)
+        );
+
+        const newMap: MapState = {
+            gridWidth: width,
+            gridHeight: height,
+            cellSize,
+            fogGrid,
+        };
+
+        await updateMap(newMap);
+    };
+
+    const handleCellClick = async (x: number, y: number) => {
+        await toggleCell(x, y);
     };
 
     // Render based on view state
@@ -184,6 +406,48 @@ export default function PlayPage() {
                             <ChevronRight size={20} />
                         </button>
                     </div>
+
+                    {/* Recent Sessions - Continue where you left off */}
+                    {recentSessions.length > 0 && (
+                        <div className={styles.recentSessions}>
+                            <h3><Clock size={18} /> Recent Sessions</h3>
+                            <div className={styles.recentList}>
+                                {recentSessions.map(rs => (
+                                    <div key={rs.code} className={styles.recentCard}>
+                                        <button
+                                            className={styles.recentBtn}
+                                            onClick={() => handleRejoinSession(rs)}
+                                            disabled={loading}
+                                        >
+                                            <div className={styles.recentIcon}>
+                                                {rs.role === 'dm' ? <Crown size={18} /> : <User size={18} />}
+                                            </div>
+                                            <div className={styles.recentInfo}>
+                                                <span className={styles.recentName}>{rs.name}</span>
+                                                <span className={styles.recentMeta}>
+                                                    {rs.role === 'dm' ? 'Dungeon Master' : rs.characterName || 'Player'}
+                                                    {' • '}
+                                                    {new Date(rs.lastPlayed).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <span className={styles.recentCode}>{rs.code}</span>
+                                        </button>
+                                        <button
+                                            className={styles.recentDelete}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeRecentSession(rs.code);
+                                            }}
+                                            title="Remove from history"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                            {error && <div className={styles.error}>{error}</div>}
+                        </div>
+                    )}
                 </motion.div>
             </div>
         );
@@ -253,26 +517,7 @@ export default function PlayPage() {
                     <h2><Users size={24} /> Join Session</h2>
                     <p>Enter the session code from your DM</p>
 
-                    <div className={styles.formGroup}>
-                        <label>Your Name</label>
-                        <input
-                            type="text"
-                            value={playerName}
-                            onChange={(e) => setPlayerName(e.target.value)}
-                            placeholder="Adventurer"
-                        />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label>Character Name (optional)</label>
-                        <input
-                            type="text"
-                            value={characterName}
-                            onChange={(e) => setCharacterName(e.target.value)}
-                            placeholder="Gandalf the Gray"
-                        />
-                    </div>
-
+                    {/* Session Code Input - Primary Requirement */}
                     <div className={styles.formGroup}>
                         <label>Session Code</label>
                         <input
@@ -285,10 +530,109 @@ export default function PlayPage() {
                         />
                     </div>
 
+                    <div className={styles.formGroup}>
+                        <label>Your Name</label>
+                        <input
+                            type="text"
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
+                            placeholder="Your Name (e.g. John)"
+                        />
+                    </div>
+
+                    <div className={styles.divider}></div>
+
+                    <h3>Who are you playing?</h3>
+
+                    {!selectedCharId ? (
+                        <div className={styles.characterSelection}>
+                            {characters.length > 0 && (
+                                <div className={styles.existingChars}>
+                                    <label>Select from Libary</label>
+                                    <select
+                                        className={styles.charSelect}
+                                        onChange={(e) => {
+                                            const char = characters.find(c => c.id === e.target.value);
+                                            if (char) {
+                                                setSelectedCharId(char.id);
+                                                setMyCharacter(char);
+                                                setCharacterName(char.name);
+                                            }
+                                        }}
+                                        defaultValue=""
+                                    >
+                                        <option value="" disabled>-- Choose Character --</option>
+                                        {characters.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name} - {c.class} {c.level}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            <button
+                                className={`${styles.selectionBtn} ${styles.createBtn}`}
+                                onClick={() => setShowCharCreator(true)}
+                            >
+                                <div className={styles.btnIcon}><Plus size={20} /></div>
+                                <div>
+                                    <strong>Create New Character</strong>
+                                    <span>Build a hero from scratch</span>
+                                </div>
+                            </button>
+
+                            <div className={styles.manualEntry}>
+                                <div className={styles.orDivider}><span>OR</span></div>
+                                <label>Join as Guest / Manual Entry</label>
+                                <input
+                                    type="text"
+                                    value={characterName}
+                                    onChange={(e) => setCharacterName(e.target.value)}
+                                    placeholder="Character Name (e.g. Gandalf)"
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={styles.selectedCharCard}>
+                            <div className={styles.selectedCharInfo}>
+                                <div className={styles.charAvatar}>
+                                    {myCharacter?.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <strong>{myCharacter?.name}</strong>
+                                    <span>{myCharacter?.race} {myCharacter?.class} • Lvl {myCharacter?.level}</span>
+                                </div>
+                            </div>
+                            <button
+                                className={styles.removeCharBtn}
+                                onClick={() => {
+                                    setSelectedCharId('');
+                                    setMyCharacter(null);
+                                    setCharacterName('');
+                                }}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    )}
+
+                    <AnimatePresence>
+                        {showCharCreator && (
+                            <CharacterCreator
+                                onClose={() => setShowCharCreator(false)}
+                                onCreate={(newChar) => {
+                                    setSelectedCharId(newChar.id);
+                                    setMyCharacter(newChar);
+                                    setCharacterName(newChar.name);
+                                }}
+                            />
+                        )}
+                    </AnimatePresence>
+
                     {error && <div className={styles.error}>{error}</div>}
 
                     <button
                         className="btn btn-gold btn-lg"
+                        style={{ width: '100%', marginTop: '1.5rem' }}
                         onClick={handleJoinSession}
                         disabled={loading || !joinCode.trim() || joinCode.length < 6}
                     >
@@ -375,7 +719,7 @@ export default function PlayPage() {
                             <button
                                 className="btn btn-gold btn-lg"
                                 onClick={startGame}
-                                disabled={session.players.length === 0}
+                                disabled={false}
                             >
                                 <Play size={18} /> Start Adventure
                             </button>
@@ -410,8 +754,8 @@ export default function PlayPage() {
                 <div className={styles.gameLayout}>
                     {/* Main Content Area */}
                     <div className={styles.mainArea}>
-                        <div className={styles.gameHeader}>
-                            <h2>{session.name}</h2>
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                            <h2 className="text-lg md:text-xl font-bold text-white">{session.name}</h2>
                             <div className={styles.gameStatus}>
                                 <span className={styles.roundBadge}>Round {session.combat.round}</span>
                                 {session.combat.isActive && currentCombatant && (
@@ -420,33 +764,89 @@ export default function PlayPage() {
                                     </span>
                                 )}
                             </div>
-                            <div className={styles.headerActions}>
-                                <button
-                                    className="btn btn-secondary btn-sm"
-                                    onClick={() => setShowSpellCaster(true)}
-                                >
-                                    <Sparkles size={16} /> Spells
-                                </button>
-                                {isDM && (
+                            <div className="flex flex-wrap gap-2 md:gap-3">
+                                {myCharacter && (
                                     <button
-                                        className="btn btn-secondary btn-sm"
-                                        onClick={() => setShowBestiary(true)}
+                                        className="btn btn-secondary btn-sm text-xs md:text-sm"
+                                        onClick={() => setShowCharacterSheet(true)}
                                     >
-                                        <Skull size={16} /> Bestiary
+                                        <User size={14} className="md:w-4 md:h-4" /> <span className="hidden sm:inline">Character</span>
                                     </button>
                                 )}
+                                <button
+                                    className="btn btn-secondary btn-sm text-xs md:text-sm"
+                                    onClick={() => setShowSpellCaster(true)}
+                                >
+                                    <Sparkles size={14} className="md:w-4 md:h-4" /> <span className="hidden sm:inline">Spells</span>
+                                </button>
+                                {/* Show Map button: DM always, players only when map exists */}
+                                {(isDM || session.map) && (
+                                    <button
+                                        className={`btn btn-secondary btn-sm text-xs md:text-sm ${showMap ? styles.activeBtn : ''}`}
+                                        onClick={() => setShowMap(!showMap)}
+                                    >
+                                        <Map size={14} className="md:w-4 md:h-4" /> <span className="hidden sm:inline">{showMap ? 'Hide Map' : 'Map'}</span>
+                                    </button>
+                                )}
+                                {/* Shop button: DM always, players only when shop exists */}
+                                {(isDM || session.shop) && (
+                                    <button
+                                        className={`btn btn-secondary btn-sm text-xs md:text-sm ${showShop ? styles.activeBtn : ''}`}
+                                        onClick={() => setShowShop(true)}
+                                    >
+                                        <Store size={14} className="md:w-4 md:h-4" /> <span className="hidden sm:inline">Shop</span>
+                                    </button>
+                                )}
+                                {isDM && (
+                                    <>
+                                        <button
+                                            className="btn btn-secondary btn-sm text-xs md:text-sm"
+                                            onClick={() => setShowSpellCreator(true)}
+                                        >
+                                            <Plus size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Manage Spells</span>
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary btn-sm text-xs md:text-sm"
+                                            onClick={() => setShowBestiary(true)}
+                                        >
+                                            <Skull size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Bestiary</span>
+                                        </button>
+                                    </>
+                                )}
+                                {/* Save & Exit button */}
+                                <button
+                                    className={`btn ${isDM ? 'btn-gold' : 'btn-secondary'} btn-sm text-xs md:text-sm`}
+                                    onClick={handleSaveAndExit}
+                                    title={isDM ? "Save session and exit (players can rejoin later)" : "Exit session"}
+                                >
+                                    <Save size={14} className="md:w-4 md:h-4" /> <span className="hidden sm:inline">{isDM ? 'Save & Exit' : 'Exit'}</span>
+                                </button>
                             </div>
                         </div>
 
                         {/* Modals */}
                         <AnimatePresence>
+                            {showCharacterSheet && myCharacter && (
+                                <CharacterSheetPanel
+                                    character={myCharacter}
+                                    onClose={() => setShowCharacterSheet(false)}
+                                />
+                            )}
+                            {showSpellCreator && (
+                                <SpellCreator
+                                    sessionCode={sessionCode || ''}
+                                    onClose={() => setShowSpellCreator(false)}
+                                />
+                            )}
                             {showSpellCaster && (
                                 <SpellCaster
                                     characterName={playerName}
-                                    characterClass="any"
+                                    characterClass={myCharacter?.class || "any"}
+                                    characterLevel={myCharacter?.level || 1}
                                     spellcastingAbility="intelligence"
                                     spellcastingModifier={0}
                                     proficiencyBonus={2}
+                                    customSpells={session.customSpells}
                                     targets={session.combat.combatants.map(c => ({
                                         id: c.id,
                                         name: c.name,
@@ -462,7 +862,63 @@ export default function PlayPage() {
                                     onClose={() => setShowBestiary(false)}
                                 />
                             )}
+                            {conditionPickerTarget && (
+                                <ConditionPicker
+                                    combatantId={conditionPickerTarget.id}
+                                    combatantName={conditionPickerTarget.name}
+                                    currentConditions={conditionPickerTarget.conditions}
+                                    onToggleCondition={toggleCondition}
+                                    onClose={() => setConditionPickerTarget(null)}
+                                />
+                            )}
+                            {showShop && (
+                                <Shop
+                                    shop={session.shop}
+                                    isDM={isDM}
+                                    playerGold={myCharacter?.currency?.gold || 0}
+                                    onUpdateShop={setShop}
+                                    onBuyItem={async (item) => {
+                                        // For now, just send a message about the purchase
+                                        await sendMessage(`purchased ${item.name} for ${item.price} GP`);
+                                    }}
+                                    onClose={() => setShowShop(false)}
+                                />
+                            )}
                         </AnimatePresence>
+
+                        {/* Battle Map Section */}
+                        {showMap && (
+                            <div className={styles.mapSection}>
+                                <div className={styles.mapContainer}>
+                                    {session.map ? (
+                                        <BattleMap
+                                            map={session.map}
+                                            isDM={isDM}
+                                            onCellClick={isDM ? handleCellClick : undefined}
+                                            brushSize={brushSize}
+                                        />
+                                    ) : (
+                                        <div className={styles.noMapPlaceholder}>
+                                            <Map size={48} />
+                                            <p>No battle map created yet</p>
+                                            {isDM && <p className={styles.hint}>Use the controls to create a map</p>}
+                                        </div>
+                                    )}
+                                </div>
+                                {isDM && (
+                                    <div className={styles.mapControlsPanel}>
+                                        <MapControls
+                                            map={session.map}
+                                            onCreateMap={handleCreateMap}
+                                            onRevealAll={revealAll}
+                                            onHideAll={hideAll}
+                                            brushSize={brushSize}
+                                            onBrushSizeChange={setBrushSize}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Combat Tracker */}
                         <div className={styles.combatArea}>
@@ -491,6 +947,24 @@ export default function PlayPage() {
                                                         <span><Shield size={12} /> {combatant.armorClass}</span>
                                                         <span><Heart size={12} /> {combatant.currentHitPoints}/{combatant.maxHitPoints}</span>
                                                     </div>
+                                                    {/* Condition Badges */}
+                                                    {combatant.conditions && combatant.conditions.length > 0 && (
+                                                        <div className={styles.conditionBadges}>
+                                                            {combatant.conditions.map(condition => (
+                                                                <ConditionBadge
+                                                                    key={condition}
+                                                                    condition={condition}
+                                                                    size="sm"
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {(isDM || isMine) && (
+                                                        <div className={styles.quickHp}>
+                                                            <button onClick={() => updateCombatantHP(combatant.id, -1)} className={styles.hpBtnMinus}>-1</button>
+                                                            <button onClick={() => updateCombatantHP(combatant.id, 1)} className={styles.hpBtnPlus}>+1</button>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 {/* Death Saves for unconscious players */}
@@ -538,6 +1012,31 @@ export default function PlayPage() {
                                                         </div>
                                                     </div>
                                                 )}
+
+                                                <div className={styles.combatActions}>
+                                                    {(isDM || isMine) && (
+                                                        <button
+                                                            className={styles.actionBtn}
+                                                            onClick={() => setConditionPickerTarget({
+                                                                id: combatant.id,
+                                                                name: combatant.name,
+                                                                conditions: combatant.conditions || []
+                                                            })}
+                                                            title="Manage conditions"
+                                                        >
+                                                            <AlertTriangle size={14} />
+                                                        </button>
+                                                    )}
+                                                    {session.combat.isActive && !isMine && (
+                                                        <button
+                                                            className={styles.actionBtn}
+                                                            onClick={() => handleAttack(combatant.id, combatant.name)}
+                                                            title="Attack this target"
+                                                        >
+                                                            <Swords size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
 
                                                 <div className={styles.hpBar}>
                                                     <div

@@ -1,29 +1,22 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
     Sparkles, Target, Heart, Shield, Skull,
-    Zap, X, ChevronDown, Dice6
+    Zap, Dice6
 } from 'lucide-react';
 import { Spell, AbilityScore } from '@/types';
 import { spells, getSpellsByClass, getSpellsByLevel } from '@/data/spells';
 import { ActiveEffect, EFFECT_TEMPLATES, calculateHealing, createEffect, generateEffectId } from '@/lib/effects';
 import { executeRoll } from '@/lib/dice';
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import styles from './SpellCaster.module.css';
-
-interface SpellCasterProps {
-    characterName: string;
-    characterClass: string;
-    spellcastingAbility: AbilityScore;
-    spellcastingModifier: number;
-    proficiencyBonus: number;
-    spellsKnown?: string[];
-    preparedSpells?: string[];
-    targets: { id: string; name: string; type: 'ally' | 'enemy' | 'self' }[];
-    onCastSpell: (result: SpellCastResult) => void;
-    onClose: () => void;
-}
 
 export interface SpellCastResult {
     spell: Spell;
@@ -39,14 +32,31 @@ export interface SpellCastResult {
     description: string;
 }
 
+interface SpellCasterProps {
+    characterName: string;
+    characterClass: string;
+    characterLevel?: number;
+    spellcastingAbility: AbilityScore;
+    spellcastingModifier: number;
+    proficiencyBonus: number;
+    spellsKnown?: string[];
+    preparedSpells?: string[];
+    customSpells?: Spell[]; // New prop
+    targets: { id: string; name: string; type: 'ally' | 'enemy' | 'self' }[];
+    onCastSpell: (result: SpellCastResult) => void;
+    onClose: () => void;
+}
+
 export default function SpellCaster({
     characterName,
     characterClass,
+    characterLevel = 1,
     spellcastingAbility,
     spellcastingModifier,
     proficiencyBonus,
     spellsKnown,
     preparedSpells,
+    customSpells = [], // Default to empty
     targets,
     onCastSpell,
     onClose,
@@ -61,9 +71,17 @@ export default function SpellCaster({
     const spellSaveDC = 8 + proficiencyBonus + spellcastingModifier;
     const spellAttackBonus = proficiencyBonus + spellcastingModifier;
 
+    // Calculate max spell level based on character level (Simplified Full Caster progression)
+    const maxSpellLevel = Math.min(9, Math.ceil(characterLevel / 2));
+
     // Get available spells for this class
     const availableSpells = useMemo(() => {
-        let result = characterClass === 'any' ? spells : getSpellsByClass(characterClass.toLowerCase());
+        // Combine built-in spells and custom spells
+        const allSpells = [...spells, ...customSpells];
+
+        let result = characterClass === 'any'
+            ? allSpells
+            : allSpells.filter(s => s.classes.includes(characterClass.toLowerCase()) || s.classes.includes('any'));
 
         // Filter to known/prepared spells if provided
         if (preparedSpells && preparedSpells.length > 0) {
@@ -71,6 +89,8 @@ export default function SpellCaster({
         } else if (spellsKnown && spellsKnown.length > 0) {
             result = result.filter(s => spellsKnown.includes(s.id));
         }
+
+        // ... remainder of filtering logic is same
 
         // Apply filters
         if (filterLevel !== null) {
@@ -87,6 +107,11 @@ export default function SpellCaster({
         return result.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
     }, [characterClass, spellsKnown, preparedSpells, filterLevel, searchQuery]);
 
+    const isSpellLocked = (spell: Spell) => {
+        if (spell.level === 0) return false; // Cantrips always available
+        return spell.level > maxSpellLevel;
+    };
+
 
     const toggleTarget = (targetId: string) => {
         setSelectedTargets(prev =>
@@ -98,7 +123,6 @@ export default function SpellCaster({
 
     const castSpell = async () => {
         if (!selectedSpell || selectedTargets.length === 0) return;
-
         setIsCasting(true);
 
         const targetNames = selectedTargets.map(id =>
@@ -212,25 +236,19 @@ export default function SpellCaster({
     };
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <motion.div
-                className={styles.spellCaster}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className={styles.header}>
-                    <h2><Sparkles size={20} /> Cast Spell</h2>
+        <Sheet open onOpenChange={() => onClose()}>
+            <SheetContent side="right" className={styles.sheetContent}>
+                <SheetHeader className={styles.sheetHeader}>
+                    <SheetTitle className={styles.sheetTitle}>
+                        <Sparkles size={20} /> Spellbook
+                    </SheetTitle>
                     <div className={styles.casterInfo}>
                         <span>{characterName}</span>
-                        <span className={styles.statBadge}>Save DC: {spellSaveDC}</span>
-                        <span className={styles.statBadge}>Atk: +{spellAttackBonus}</span>
+                        <span className={styles.statBadge}>Lvl {characterLevel} {characterClass}</span>
+                        <span className={styles.statBadge}>DC {spellSaveDC}</span>
+                        <span className={styles.statBadge}>+{spellAttackBonus}</span>
                     </div>
-                    <button className={styles.closeBtn} onClick={onClose}>
-                        <X size={20} />
-                    </button>
-                </div>
+                </SheetHeader>
 
                 <div className={styles.content}>
                     {/* Spell List */}
@@ -249,7 +267,7 @@ export default function SpellCaster({
                                 <option value="">All Levels</option>
                                 <option value="0">Cantrips</option>
                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(l => (
-                                    <option key={l} value={l}>Level {l}</option>
+                                    <option key={l} value={l}>Level {l} {l > maxSpellLevel ? '🔒' : ''}</option>
                                 ))}
                             </select>
                         </div>
@@ -258,25 +276,33 @@ export default function SpellCaster({
                             {availableSpells.length === 0 ? (
                                 <p className={styles.noSpells}>No spells available</p>
                             ) : (
-                                availableSpells.map(spell => (
-                                    <button
-                                        key={spell.id}
-                                        className={`${styles.spellItem} ${selectedSpell?.id === spell.id ? styles.selected : ''}`}
-                                        onClick={() => {
-                                            setSelectedSpell(spell);
-                                            setSpellSlotLevel(Math.max(1, spell.level));
-                                        }}
-                                    >
-                                        <div className={styles.spellIcon}>{getSpellTypeIcon(spell)}</div>
-                                        <div className={styles.spellInfo}>
-                                            <span className={styles.spellName}>{spell.name}</span>
-                                            <span className={styles.spellMeta}>
-                                                {spell.level === 0 ? 'Cantrip' : `Level ${spell.level}`} • {spell.school}
-                                            </span>
-                                        </div>
-                                        {spell.concentration && <span className={styles.concBadge}>C</span>}
-                                    </button>
-                                ))
+                                availableSpells.map(spell => {
+                                    const locked = isSpellLocked(spell);
+                                    return (
+                                        <button
+                                            key={spell.id}
+                                            className={`${styles.spellItem} 
+                                                ${selectedSpell?.id === spell.id ? styles.selected : ''} 
+                                                ${locked ? styles.locked : ''}
+                                            `}
+                                            onClick={() => {
+                                                setSelectedSpell(spell);
+                                                setSpellSlotLevel(Math.max(1, spell.level));
+                                            }}
+                                        >
+                                            <div className={styles.spellIcon}>{getSpellTypeIcon(spell)}</div>
+                                            <div className={styles.spellInfo}>
+                                                <span className={styles.spellName}>
+                                                    {spell.name} {locked && '🔒'}
+                                                </span>
+                                                <span className={styles.spellMeta}>
+                                                    {spell.level === 0 ? 'Cantrip' : `Level ${spell.level}`} • {spell.school}
+                                                </span>
+                                            </div>
+                                            {spell.concentration && <span className={styles.concBadge}>C</span>}
+                                        </button>
+                                    );
+                                })
                             )}
                         </div>
                     </div>
@@ -287,6 +313,11 @@ export default function SpellCaster({
                             <>
                                 <div className={styles.selectedSpell}>
                                     <h3>{selectedSpell.name}</h3>
+                                    {isSpellLocked(selectedSpell) && (
+                                        <div className={styles.lockedMessage}>
+                                            🔒 Requires Level {selectedSpell.level * 2 - 1}
+                                        </div>
+                                    )}
                                     <p className={styles.spellDesc}>{selectedSpell.description}</p>
 
                                     <div className={styles.spellStats}>
@@ -309,7 +340,7 @@ export default function SpellCaster({
                                         </div>
                                     )}
 
-                                    {selectedSpell.level > 0 && (
+                                    {selectedSpell.level > 0 && !isSpellLocked(selectedSpell) && (
                                         <div className={styles.slotSelector}>
                                             <label>Cast at level:</label>
                                             <select
@@ -317,7 +348,7 @@ export default function SpellCaster({
                                                 onChange={(e) => setSpellSlotLevel(parseInt(e.target.value))}
                                             >
                                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9]
-                                                    .filter(l => l >= selectedSpell.level)
+                                                    .filter(l => l >= selectedSpell.level && l <= maxSpellLevel)
                                                     .map(l => (
                                                         <option key={l} value={l}>Level {l}</option>
                                                     ))
@@ -344,17 +375,18 @@ export default function SpellCaster({
                                     </div>
                                 </div>
 
-                                <button
-                                    className={`btn btn-gold btn-lg ${styles.castBtn}`}
+                                <Button
+                                    className={`${styles.castBtn} bg-amber-600 hover:bg-amber-700`}
+                                    size="lg"
                                     onClick={castSpell}
-                                    disabled={selectedTargets.length === 0 || isCasting}
+                                    disabled={selectedTargets.length === 0 || isCasting || isSpellLocked(selectedSpell)}
                                 >
                                     {isCasting ? (
                                         <>Casting...</>
                                     ) : (
                                         <><Dice6 size={18} /> Cast {selectedSpell.name}</>
                                     )}
-                                </button>
+                                </Button>
                             </>
                         ) : (
                             <div className={styles.noSelection}>
@@ -364,7 +396,7 @@ export default function SpellCaster({
                         )}
                     </div>
                 </div>
-            </motion.div>
-        </div>
+            </SheetContent>
+        </Sheet>
     );
 }

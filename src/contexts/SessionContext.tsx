@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { GameSession, ChatMessage, SessionCombatant, subscribeToSession, updateCombatState, sendChatMessage, updateSessionStatus, leaveSession } from '@/lib/firebase';
+import { GameSession, ChatMessage, SessionCombatant, MapState, Shop, subscribeToSession, updateCombatState, sendChatMessage, updateSessionStatus, leaveSession, updateCombatantConditions, updateMapState, revealCell, hideCell, updateShop } from '@/lib/firebase';
 import { executeRoll } from '@/lib/dice';
 
 interface SessionContextType {
@@ -24,6 +24,7 @@ interface SessionContextType {
     nextTurn: () => Promise<void>;
     updateCombatantHP: (combatantId: string, delta: number) => Promise<void>;
     updateCombatantDeathSaves: (combatantId: string, result: 'success' | 'failure') => Promise<void>;
+    toggleCondition: (combatantId: string, condition: string) => Promise<void>;
 
     // Chat actions
     sendMessage: (content: string) => Promise<void>;
@@ -34,6 +35,15 @@ interface SessionContextType {
     pauseGame: () => Promise<void>;
     endGame: () => Promise<void>;
     leave: () => Promise<void>;
+
+    // Map actions (Fog of War)
+    updateMap: (map: MapState) => Promise<void>;
+    toggleCell: (x: number, y: number) => Promise<void>;
+    revealAll: () => Promise<void>;
+    hideAll: () => Promise<void>;
+
+    // Shop actions
+    setShop: (shop: Shop) => Promise<void>;
 }
 
 const SessionContext = createContext<SessionContextType | null>(null);
@@ -41,10 +51,46 @@ const SessionContext = createContext<SessionContextType | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
     // ... (keep creating variables)
     const [session, setSession] = useState<GameSession | null>(null);
-    const [sessionCode, setSessionCode] = useState<string | null>(null);
-    const [playerId, setPlayerId] = useState<string | null>(null);
+    const [sessionCode, _setSessionCode] = useState<string | null>(null);
+    const [playerId, _setPlayerId] = useState<string | null>(null);
     const [playerName, setPlayerName] = useState('Adventurer');
     const [isConnected, setIsConnected] = useState(false);
+
+    // Initialize state from localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const savedCode = localStorage.getItem('dnd_session_code');
+            const savedId = localStorage.getItem('dnd_player_id');
+            const savedName = localStorage.getItem('dnd_player_name');
+
+            if (savedCode) _setSessionCode(savedCode);
+            if (savedId) _setPlayerId(savedId);
+            if (savedName) setPlayerName(savedName);
+        }
+    }, []);
+
+    const setSessionCode = (code: string | null) => {
+        _setSessionCode(code);
+        if (code) {
+            localStorage.setItem('dnd_session_code', code);
+        } else {
+            localStorage.removeItem('dnd_session_code');
+        }
+    };
+
+    const setPlayerId = (id: string) => {
+        _setPlayerId(id);
+        if (id) {
+            localStorage.setItem('dnd_player_id', id);
+        }
+    };
+
+    // Update player name in storage
+    useEffect(() => {
+        if (playerName) {
+            localStorage.setItem('dnd_player_name', playerName);
+        }
+    }, [playerName]);
 
     // Subscribe to session updates
     useEffect(() => {
@@ -141,6 +187,23 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         await updateCombat({ ...session.combat, combatants: newCombatants });
     }, [session, sessionCode, updateCombat]);
 
+    const toggleCondition = useCallback(async (combatantId: string, condition: string) => {
+        if (!session || !sessionCode) return;
+        const combatant = session.combat.combatants.find(c => c.id === combatantId);
+        if (!combatant) return;
+
+        const currentConditions = combatant.conditions || [];
+        let newConditions: string[];
+
+        if (currentConditions.includes(condition)) {
+            newConditions = currentConditions.filter(c => c !== condition);
+        } else {
+            newConditions = [...currentConditions, condition];
+        }
+
+        await updateCombatantConditions(sessionCode, combatantId, newConditions);
+    }, [session, sessionCode]);
+
     // Chat actions
     const sendMessage = useCallback(async (content: string) => {
         if (!sessionCode || !playerId) return;
@@ -212,6 +275,40 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         setSessionCode(null);
     }, [sessionCode, playerId]);
 
+    // Map actions (Fog of War)
+    const updateMap = useCallback(async (map: MapState) => {
+        if (!sessionCode) return;
+        await updateMapState(sessionCode, map);
+    }, [sessionCode]);
+
+    const toggleCell = useCallback(async (x: number, y: number) => {
+        if (!session || !sessionCode || !session.map) return;
+        const isRevealed = session.map.fogGrid[y]?.[x];
+        if (isRevealed) {
+            await hideCell(sessionCode, x, y);
+        } else {
+            await revealCell(sessionCode, x, y);
+        }
+    }, [session, sessionCode]);
+
+    const revealAllCells = useCallback(async () => {
+        if (!session || !sessionCode || !session.map) return;
+        const newFogGrid = session.map.fogGrid.map(row => row.map(() => true));
+        await updateMapState(sessionCode, { ...session.map, fogGrid: newFogGrid });
+    }, [session, sessionCode]);
+
+    const hideAllCells = useCallback(async () => {
+        if (!session || !sessionCode || !session.map) return;
+        const newFogGrid = session.map.fogGrid.map(row => row.map(() => false));
+        await updateMapState(sessionCode, { ...session.map, fogGrid: newFogGrid });
+    }, [session, sessionCode]);
+
+    // Shop actions
+    const setShop = useCallback(async (shop: Shop) => {
+        if (!sessionCode) return;
+        await updateShop(sessionCode, shop);
+    }, [sessionCode]);
+
     return (
         <SessionContext.Provider value={{
             session,
@@ -229,12 +326,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             nextTurn,
             updateCombatantHP,
             updateCombatantDeathSaves,
+            toggleCondition,
             sendMessage,
             sendRoll,
             startGame,
             pauseGame,
             endGame,
             leave,
+            updateMap,
+            toggleCell,
+            revealAll: revealAllCells,
+            hideAll: hideAllCells,
+            setShop,
         }}>
             {children}
         </SessionContext.Provider>

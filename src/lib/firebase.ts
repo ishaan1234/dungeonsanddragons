@@ -2,6 +2,7 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { Spell } from '@/types';
 
 // Firebase configuration - Replace with your own config
 const firebaseConfig = {
@@ -67,6 +68,29 @@ export interface SessionCombatant {
     };
 }
 
+export interface MapState {
+    gridWidth: number;
+    gridHeight: number;
+    cellSize: number;
+    fogGrid: boolean[][]; // true = revealed, false = hidden
+    backgroundImage?: string;
+}
+
+export interface ShopItem {
+    id: string;
+    name: string;
+    description: string;
+    price: number; // in gold pieces
+    quantity: number; // -1 for unlimited
+    category: 'weapon' | 'armor' | 'potion' | 'gear' | 'magic' | 'other';
+}
+
+export interface Shop {
+    isOpen: boolean;
+    name: string;
+    items: ShopItem[];
+}
+
 export interface GameSession {
     id: string;
     name: string;
@@ -87,6 +111,15 @@ export interface GameSession {
 
     // Chat messages (last 100)
     recentMessages: ChatMessage[];
+
+    // Custom Content
+    customSpells?: Spell[];
+
+    // Battle Map with Fog of War
+    map?: MapState;
+
+    // Shop for buying/selling items
+    shop?: Shop;
 }
 
 // Generate a random session code (6 characters)
@@ -118,11 +151,21 @@ export async function createSession(dmId: string, dmName: string, sessionName: s
             combatants: [],
         },
         recentMessages: [],
+        customSpells: [],
     };
 
     await setDoc(doc(db, 'sessions', sessionCode), session);
     return sessionCode;
 }
+
+// Add a custom spell to the session
+export async function addCustomSpell(sessionCode: string, spell: Spell): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    await updateDoc(sessionRef, {
+        customSpells: arrayUnion(spell)
+    });
+}
+
 
 // Join a session
 export async function joinSession(
@@ -140,6 +183,11 @@ export async function joinSession(
     }
 
     const session = sessionSnap.data() as GameSession;
+
+    // Check if player is the DM
+    if (session.dmId === playerId) {
+        return session;
+    }
 
     // Check if player already in session
     const existingPlayer = session.players.find(p => p.odid === playerId);
@@ -225,8 +273,114 @@ export async function leaveSession(
     }
 }
 
+// Update combatant conditions
+export async function updateCombatantConditions(
+    sessionCode: string,
+    combatantId: string,
+    conditions: string[]
+): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (sessionSnap.exists()) {
+        const session = sessionSnap.data() as GameSession;
+        const updatedCombatants = session.combat.combatants.map(c =>
+            c.id === combatantId ? { ...c, conditions } : c
+        );
+        await updateDoc(sessionRef, {
+            combat: { ...session.combat, combatants: updatedCombatants }
+        });
+    }
+}
+
 // Anonymous auth for quick play
 export async function signInAnon(): Promise<string> {
     const result = await signInAnonymously(auth);
     return result.user.uid;
+}
+
+// Map Functions for Fog of War
+
+// Update the entire map state
+export async function updateMapState(
+    sessionCode: string,
+    map: MapState
+): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    await updateDoc(sessionRef, { map });
+}
+
+// Reveal a single cell
+export async function revealCell(
+    sessionCode: string,
+    x: number,
+    y: number
+): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (sessionSnap.exists()) {
+        const session = sessionSnap.data() as GameSession;
+        if (session.map) {
+            const newFogGrid = session.map.fogGrid.map(row => [...row]);
+            if (newFogGrid[y] && newFogGrid[y][x] !== undefined) {
+                newFogGrid[y][x] = true;
+                await updateDoc(sessionRef, {
+                    map: { ...session.map, fogGrid: newFogGrid }
+                });
+            }
+        }
+    }
+}
+
+// Hide a single cell
+export async function hideCell(
+    sessionCode: string,
+    x: number,
+    y: number
+): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (sessionSnap.exists()) {
+        const session = sessionSnap.data() as GameSession;
+        if (session.map) {
+            const newFogGrid = session.map.fogGrid.map(row => [...row]);
+            if (newFogGrid[y] && newFogGrid[y][x] !== undefined) {
+                newFogGrid[y][x] = false;
+                await updateDoc(sessionRef, {
+                    map: { ...session.map, fogGrid: newFogGrid }
+                });
+            }
+        }
+    }
+}
+
+// Shop Functions
+
+// Update the shop state
+export async function updateShop(
+    sessionCode: string,
+    shop: Shop
+): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    await updateDoc(sessionRef, { shop });
+}
+
+// Toggle shop open/closed
+export async function toggleShopOpen(
+    sessionCode: string,
+    isOpen: boolean
+): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (sessionSnap.exists()) {
+        const session = sessionSnap.data() as GameSession;
+        if (session.shop) {
+            await updateDoc(sessionRef, {
+                shop: { ...session.shop, isOpen }
+            });
+        }
+    }
 }

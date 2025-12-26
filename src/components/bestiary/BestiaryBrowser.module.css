@@ -1,29 +1,27 @@
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-    padding: 2rem;
+/* shadcn Sheet overrides */
+.sheetContent {
+    background: var(--bg-dark, var(--surface-800)) !important;
+    border-left: 1px solid var(--bg-medium, var(--surface-700)) !important;
+    width: 100% !important;
+    max-width: 900px !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
-.browserContainer {
-    width: 100%;
-    max-width: 1000px;
-    height: 80vh;
-    background: var(--surface-800);
-    border: 1px solid var(--primary-500-20);
-    border-radius: 12px;
+.sheetHeader {
+    padding: 1.5rem;
+    padding-right: 3rem;
+    border-bottom: 1px solid var(--bg-medium, var(--surface-700));
+    background: var(--bg-darker, var(--surface-800));
+}
+
+.sheetTitle {
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    color: var(--text-primary);
 }
 
 .header {

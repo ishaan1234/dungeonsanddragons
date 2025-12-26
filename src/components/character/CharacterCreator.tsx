@@ -11,6 +11,7 @@ import { rollAbilityScore, STANDARD_ARRAY, POINT_BUY_COSTS, POINT_BUY_TOTAL } fr
 
 interface CharacterCreatorProps {
   onClose: () => void;
+  onCreate?: (character: Character) => void;
 }
 
 const steps = ['Basics', 'Race', 'Class', 'Abilities', 'Background', 'Review'];
@@ -27,7 +28,7 @@ const backgrounds = [
   { id: 'hermit', name: 'Hermit', description: 'You lived in seclusion for a formative part of your life.' },
 ];
 
-export default function CharacterCreator({ onClose }: CharacterCreatorProps) {
+export default function CharacterCreator({ onClose, onCreate }: CharacterCreatorProps) {
   const { addCharacter, userName } = useAppStore();
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -196,6 +197,7 @@ export default function CharacterCreator({ onClose }: CharacterCreatorProps) {
     };
 
     addCharacter(character);
+    if (onCreate) onCreate(character);
     onClose();
   };
 
