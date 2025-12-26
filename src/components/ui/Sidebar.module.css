@@ -123,8 +123,27 @@
 
 .sidebarNav {
     flex: 1;
-    padding: 1rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     overflow-y: auto;
+}
+
+.navSection {
+    margin-bottom: 1rem;
+}
+
+.navSection:last-child {
+    margin-bottom: 0;
+}
+
+.sectionLabel {
+    display: block;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
 }
 
 .sidebarNav ul {

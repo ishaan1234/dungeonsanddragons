@@ -32,18 +32,42 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-const navItems: NavItem[] = [
-  { id: 'play', label: 'Play Online', href: '/play', icon: <Play size={20} /> },
-  { id: 'dashboard', label: 'Dashboard', href: '/', icon: <Home size={20} /> },
-  { id: 'characters', label: 'Characters', href: '/characters', icon: <Users size={20} /> },
-  { id: 'campaign', label: 'Campaign', href: '/campaign', icon: <BookOpen size={20} /> },
-  { id: 'combat', label: 'Combat', href: '/combat', icon: <Swords size={20} /> },
-  { id: 'spells', label: 'Spells', href: '/spells', icon: <Sparkles size={20} /> },
-  { id: 'inventory', label: 'Inventory', href: '/inventory', icon: <Backpack size={20} /> },
-  { id: 'bestiary', label: 'Bestiary', href: '/bestiary', icon: <Skull size={20} /> },
-  { id: 'npc-generator', label: 'NPC Generator', href: '/tools/npc-generator', icon: <Users size={20} /> },
-  { id: 'notes', label: 'Session Notes', href: '/tools/notes', icon: <StickyNote size={20} /> },
-  { id: 'dice', label: 'Dice Roller', href: '/dice', icon: <Dice6 size={20} /> },
+interface NavSection {
+  id: string;
+  label: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
+  {
+    id: 'multiplayer',
+    label: 'Multiplayer',
+    items: [
+      { id: 'play', label: 'Play Online', href: '/play', icon: <Play size={20} /> },
+    ],
+  },
+  {
+    id: 'general',
+    label: 'General',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', href: '/', icon: <Home size={20} /> },
+      { id: 'characters', label: 'Characters', href: '/characters', icon: <Users size={20} /> },
+      { id: 'campaign', label: 'Campaign', href: '/campaign', icon: <BookOpen size={20} /> },
+      { id: 'spells', label: 'Spells', href: '/spells', icon: <Sparkles size={20} /> },
+      { id: 'inventory', label: 'Inventory', href: '/inventory', icon: <Backpack size={20} /> },
+    ],
+  },
+  {
+    id: 'dm-tools',
+    label: 'DM Tools',
+    items: [
+      { id: 'combat', label: 'Combat Tracker', href: '/combat', icon: <Swords size={20} /> },
+      { id: 'bestiary', label: 'Bestiary', href: '/bestiary', icon: <Skull size={20} /> },
+      { id: 'npc-generator', label: 'NPC Generator', href: '/tools/npc-generator', icon: <Users size={20} /> },
+      { id: 'notes', label: 'Session Notes', href: '/tools/notes', icon: <StickyNote size={20} /> },
+      { id: 'dice', label: 'Dice Roller', href: '/dice', icon: <Dice6 size={20} /> },
+    ],
+  },
 ];
 
 export default function Sidebar() {
@@ -90,40 +114,56 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className={styles.sidebarNav}>
-        <ul>
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <li key={item.id}>
-                <Link
-                  href={item.href}
-                  className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-                  onClick={() => setIsMobileOpen(false)}
+        {navSections.map((section) => (
+          <div key={section.id} className={styles.navSection}>
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={styles.sectionLabel}
                 >
-                  <span className={styles.navIcon}>{item.icon}</span>
-                  <AnimatePresence>
-                    {!isCollapsed && (
-                      <motion.span
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: 'auto' }}
-                        exit={{ opacity: 0, width: 0 }}
-                        className={styles.navLabel}
-                      >
-                        {item.label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className={styles.activeIndicator}
-                    />
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                  {section.label}
+                </motion.span>
+              )}
+            </AnimatePresence>
+            <ul>
+              {section.items.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <li key={item.id}>
+                    <Link
+                      href={item.href}
+                      className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+                      onClick={() => setIsMobileOpen(false)}
+                    >
+                      <span className={styles.navIcon}>{item.icon}</span>
+                      <AnimatePresence>
+                        {!isCollapsed && (
+                          <motion.span
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: 'auto' }}
+                            exit={{ opacity: 0, width: 0 }}
+                            className={styles.navLabel}
+                          >
+                            {item.label}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeIndicator"
+                          className={styles.activeIndicator}
+                        />
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       {/* Footer */}
