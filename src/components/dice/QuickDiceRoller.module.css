@@ -1,0 +1,145 @@
+.container {
+    position: relative;
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-medium);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    min-width: 200px;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gold-400);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bg-medium);
+}
+
+.diceGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+}
+
+.dieButton {
+    padding: 0.5rem 0.25rem;
+    background: var(--bg-medium);
+    border: 1px solid var(--bg-light);
+    border-radius: 0.375rem;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dieButton:hover {
+    background: var(--primary-600);
+    border-color: var(--primary-500);
+    transform: translateY(-1px);
+}
+
+.dieButton:active {
+    transform: translateY(0);
+}
+
+.modifierRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-medium);
+    border-radius: 0.375rem;
+    margin-bottom: 0.75rem;
+}
+
+.modLabel {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.modBtn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-dark);
+    border: 1px solid var(--bg-light);
+    border-radius: 0.25rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.modBtn:hover {
+    background: var(--primary-600);
+    border-color: var(--primary-500);
+}
+
+.modValue {
+    min-width: 36px;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gold-400);
+}
+
+.quickRolls {
+    display: flex;
+    gap: 0.375rem;
+    margin-bottom: 0.5rem;
+}
+
+.quickBtn {
+    flex: 1;
+    padding: 0.375rem;
+    background: var(--bg-medium);
+    border: 1px solid var(--bg-light);
+    border-radius: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.675rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.quickBtn:hover {
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.lastRoll {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--bg-medium);
+    font-size: 0.75rem;
+}
+
+.lastLabel {
+    color: var(--text-muted);
+}
+
+.lastResult {
+    color: var(--text-secondary);
+}
+
+.lastResult strong {
+    color: var(--gold-400);
+}

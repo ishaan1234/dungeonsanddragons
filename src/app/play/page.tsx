@@ -25,6 +25,7 @@ import SpellCreator from '@/components/spells/SpellCreator';
 import BattleMap from '@/components/map/BattleMap';
 import MapControls from '@/components/map/MapControls';
 import Shop from '@/components/shop/Shop';
+import QuickDiceRoller from '@/components/dice/QuickDiceRoller';
 import { useAppStore } from '@/stores/appStore';
 import { Character } from '@/types';
 import { Shop as ShopType, ShopItem } from '@/lib/firebase';
@@ -799,6 +800,10 @@ export default function PlayPage() {
                                 )}
                                 {isDM && (
                                     <>
+                                        <QuickDiceRoller
+                                            rolledBy={playerName}
+                                            onRoll={(message) => sendMessage(message)}
+                                        />
                                         <button
                                             className="btn btn-secondary btn-sm text-xs md:text-sm"
                                             onClick={() => setShowSpellCreator(true)}
