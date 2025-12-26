@@ -23,6 +23,7 @@ import CharacterCreator from '@/components/character/CharacterCreator';
 import CharacterSheetPanel from '@/components/character/CharacterSheetPanel';
 import EditableCharacterSheet from '@/components/character/EditableCharacterSheet';
 import QuickActionsBar from '@/components/play/QuickActionsBar';
+import PartyOverview from '@/components/dm/PartyOverview';
 import SpellCreator from '@/components/spells/SpellCreator';
 import BattleMap from '@/components/map/BattleMap';
 import MapControls from '@/components/map/MapControls';
@@ -58,6 +59,7 @@ export default function PlayPage() {
     const [showMap, setShowMap] = useState(false);
     const [showShop, setShowShop] = useState(false);
     const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
+    const [partyOverviewExpanded, setPartyOverviewExpanded] = useState(true);
     const [brushSize, setBrushSize] = useState(1);
     const [selectedCharId, setSelectedCharId] = useState<string>('');
     const { characters } = useAppStore();
@@ -89,6 +91,8 @@ export default function PlayPage() {
         revealAll,
         hideAll,
         setShop,
+        syncCharacter,
+        updatePlayerCharacter,
     } = useSession();
 
     // Initialize player ID on mount
@@ -164,6 +168,13 @@ export default function PlayPage() {
             }
         }
     }, [session?.combat.combatants]);
+
+    // Sync character data to session when player has a character
+    useEffect(() => {
+        if (myCharacter && sessionCode && !isDM) {
+            syncCharacter(myCharacter.id, myCharacter);
+        }
+    }, [myCharacter, sessionCode, isDM, syncCharacter]);
 
     const handleCreateSession = async () => {
         if (!sessionName.trim() || !playerId) return;
@@ -419,6 +430,11 @@ export default function PlayPage() {
         };
         handleCharacterUpdate(updated);
     }, [myCharacter, handleCharacterUpdate]);
+
+    // DM: Update a player's character
+    const handleDMUpdateCharacter = useCallback((characterId: string, updates: Partial<Character>) => {
+        updatePlayerCharacter(characterId, updates);
+    }, [updatePlayerCharacter]);
 
     // Render based on view state
     if (view === 'menu') {
@@ -959,6 +975,18 @@ export default function PlayPage() {
                                 onDeathSaveChange={handleQuickDeathSaveChange}
                                 isExpanded={quickActionsExpanded}
                                 onToggleExpand={() => setQuickActionsExpanded(!quickActionsExpanded)}
+                            />
+                        )}
+
+                        {/* DM Party Overview */}
+                        {isDM && session && (
+                            <PartyOverview
+                                players={session.players}
+                                combatants={session.combat.combatants}
+                                playerCharacters={session.playerCharacters || {}}
+                                onUpdateCharacter={handleDMUpdateCharacter}
+                                isExpanded={partyOverviewExpanded}
+                                onToggleExpand={() => setPartyOverviewExpanded(!partyOverviewExpanded)}
                             />
                         )}
 

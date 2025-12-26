@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { GameSession, ChatMessage, SessionCombatant, MapState, Shop, subscribeToSession, updateCombatState, sendChatMessage, updateSessionStatus, leaveSession, updateCombatantConditions, updateMapState, revealCell, hideCell, updateShop } from '@/lib/firebase';
+import { GameSession, ChatMessage, SessionCombatant, MapState, Shop, subscribeToSession, updateCombatState, sendChatMessage, updateSessionStatus, leaveSession, updateCombatantConditions, updateMapState, revealCell, hideCell, updateShop, syncCharacterToSession, updateSyncedCharacter } from '@/lib/firebase';
+import { Character } from '@/types';
 import { executeRoll } from '@/lib/dice';
 
 interface SessionContextType {
@@ -44,6 +45,10 @@ interface SessionContextType {
 
     // Shop actions
     setShop: (shop: Shop) => Promise<void>;
+
+    // Character sync actions
+    syncCharacter: (characterId: string, character: Character) => Promise<void>;
+    updatePlayerCharacter: (characterId: string, updates: Partial<Character>) => Promise<void>;
 }
 
 const SessionContext = createContext<SessionContextType | null>(null);
@@ -309,6 +314,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         await updateShop(sessionCode, shop);
     }, [sessionCode]);
 
+    // Character sync actions
+    const syncCharacter = useCallback(async (characterId: string, character: Character) => {
+        if (!sessionCode) return;
+        await syncCharacterToSession(sessionCode, characterId, character);
+    }, [sessionCode]);
+
+    const updatePlayerCharacter = useCallback(async (characterId: string, updates: Partial<Character>) => {
+        if (!sessionCode) return;
+        await updateSyncedCharacter(sessionCode, characterId, updates);
+    }, [sessionCode]);
+
     return (
         <SessionContext.Provider value={{
             session,
@@ -338,6 +354,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             revealAll: revealAllCells,
             hideAll: hideAllCells,
             setShop,
+            syncCharacter,
+            updatePlayerCharacter,
         }}>
             {children}
         </SessionContext.Provider>

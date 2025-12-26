@@ -2,7 +2,7 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { Spell } from '@/types';
+import { Spell, Character } from '@/types';
 
 // Firebase configuration - Replace with your own config
 const firebaseConfig = {
@@ -120,6 +120,9 @@ export interface GameSession {
 
     // Shop for buying/selling items
     shop?: Shop;
+
+    // Player character data (synced by players for DM view)
+    playerCharacters?: Record<string, Character>;
 }
 
 // Generate a random session code (6 characters)
@@ -381,6 +384,44 @@ export async function toggleShopOpen(
             await updateDoc(sessionRef, {
                 shop: { ...session.shop, isOpen }
             });
+        }
+    }
+}
+
+// Character Sync Functions
+
+// Sync a player's character data to the session (for DM view)
+export async function syncCharacterToSession(
+    sessionCode: string,
+    characterId: string,
+    character: Character
+): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (sessionSnap.exists()) {
+        const session = sessionSnap.data() as GameSession;
+        const playerCharacters = session.playerCharacters || {};
+        playerCharacters[characterId] = character;
+        await updateDoc(sessionRef, { playerCharacters });
+    }
+}
+
+// Update a synced character's data (used by DM)
+export async function updateSyncedCharacter(
+    sessionCode: string,
+    characterId: string,
+    updates: Partial<Character>
+): Promise<void> {
+    const sessionRef = doc(db, 'sessions', sessionCode);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (sessionSnap.exists()) {
+        const session = sessionSnap.data() as GameSession;
+        const playerCharacters = session.playerCharacters || {};
+        if (playerCharacters[characterId]) {
+            playerCharacters[characterId] = { ...playerCharacters[characterId], ...updates };
+            await updateDoc(sessionRef, { playerCharacters });
         }
     }
 }
